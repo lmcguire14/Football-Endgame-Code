@@ -1,0 +1,202 @@
+---
+title: "ShiftedAnalysis"
+author: "Logan Robert McGuire"
+date: "February 7, 2021"
+output: html_document
+---
+
+```{r}
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(stats4)
+library(vcd)
+library(fitdistrplus)
+seasons <- 2010:2020
+#pbp <- purrr::map_df(seasons, function(x) {
+#  readr::read_csv(
+#    glue::glue("https://raw.githubusercontent.com/guga31bb/nflfastR-data/master/data/play_by_play_{x}.csv.gz")
+#  )
+#})
+#pbp stands for PLAY BY PLAY
+
+#seperates master data set into run vs. pass
+pbp_runs <- pbp %>%
+  filter(play_type == 'run')
+pbp_pass <- pbp %>%
+  filter(play_type == 'pass')
+pbp_completion  <- pbp %>%
+  filter(play_type == 'pass' & complete_pass == 1)
+
+#grabs yards gained for all plays of given play type
+RunYardsPerPlay.Shifted <- pbp_runs$yards_gained - min(pbp_runs$yards_gained) + 1
+PassYardsPerPlay.Shifted <- pbp_pass$yards_gained - min(pbp_pass$yards_gained) + 1
+YardsPerCompletion.Shifted <- pbp_completion$yards_gained -  min(pbp_completion$yards_gained) + 1
+DeepYards.Shift <- pbp_PassDeep$yards_gained - min(pbp_PassDeep$yards_gained) +1
+
+#graph run yards per play, and associated density function
+hist(RunYardsPerPlay.Shifted, xlab="Yards Gained on Individual Run Plays", 
+     main = "Histogram of Yardage Gained on Run Plays", breaks = 100, freq = FALSE, xlim = c(0,100))
+
+#graphs pass yards per play and associated density functions
+hist(PassYardsPerPlay.Shifted, xlab="Yards Gained on Individual Pass Plays",
+     main = "Histogram of Yardage Gained on Pass Plays", breaks = 100, freq = FALSE, xlim = c(0,100))
+
+#graphs pass yards per play ON COMPLETIONS and associated density functions
+hist(YardsPerCompletion.Shifted, xlab="Yards Gained on Individual Pass Completion Plays",
+     main = "Histogram of Yardage Gained on Pass Plays", breaks = 100, freq = FALSE, xlim = c(0,100))
+```
+
+
+```{r}
+library(fitdistrplus)
+#CULLEN FREY GRAPH FOR EACH SHIFTED DISTRIBUTION
+#descdist(abs(PassYardsPerPlay.Shifted), discrete = TRUE,boot = 1001)
+#descdist(abs(RunYardsPerPlay.Shifted), discrete = TRUE,boot = 1001)
+#descdist(abs(YardsPerCompletion.Shifted), discrete = TRUE,boot = 1001)
+#descdist(abs(PassYardsPerPlay.Shifted), discrete = FALSE,boot = 1001)
+#descdist(abs(RunYardsPerPlay.Shifted), discrete = FALSE,boot = 1001)
+#descdist(abs(YardsPerCompletion.Shifted), discrete = FALSE,boot = 1001)
+```
+**Comments:** The kurtosis and squared skewness of your sample is plottet as a blue point named "Observation". Looking at the results on this, with a positive skewness and a kurtosis not far from 12, it seems that possible distributions include:
+
+**Pass:** Exponential, lognormal, gamma, Weibull
+
+**Run:** Lognormall, gamma, Weibull
+
+**Completions:** Negative Binomial, gamma, lognormal, Weibull
+
+**Good to know:** Skewness and kurtosis are known not to be robust. In order to take into account the uncertainty of the estimated values of kurtosis and skewness from data, a nonparametric bootstrap procedure can be performed by using the argument boot.
+
+
+### Let's fit some possible distributions with the data as it is and as it it suggested by the Cullen and Frey graph above:
+
+
+```{r}
+#for shifted distribution pass completions
+fnCompl.S <- fitdist(DeepYards.Shift, "norm")
+flCompl.S <- fitdist(DeepYards.Shift, "logis")
+fpCompl.S <- fitdist(DeepYards.Shift, "pois")
+fwCompl.S <- fitdist(DeepYards.Shift, "weibull")
+#LOGNORMAL!!!!
+
+#DISCRETE DISTRIBUTIONS
+par(mfrow = c(2, 2))
+plotComplS.legend <- c("poisson", "weibull")
+denscomp(list(fpCompl.S, fwCompl.S), legendtext = plotComplS.legend)
+qqcomp(list(fpCompl.S, fwCompl.S), legendtext = plotComplS.legend)
+cdfcomp(list(fpCompl.S, fwCompl.S), legendtext = plotComplS.legend)
+ppcomp(list(fpCompl.S, fwCompl.S), legendtext = plotComplS.legend)
+
+#To see continuous histogram
+plotComplS.legend <- c("normal", "logistic")
+denscomp(list(fnCompl.S, flCompl.S), legendtext = plotComplS.legend)
+qqcomp(list(fnCompl.S, flCompl.S), legendtext = plotComplS.legend)
+cdfcomp(list(fnCompl.S, flCompl.S), legendtext = plotComplS.legend)
+ppcomp(list(fnCompl.S, flCompl.S), legendtext = plotComplS.legend)
+
+gofstat(list(fnCompl.S, flCompl.S,fpCompl.S, fwCompl.S))
+
+
+```
+**Completions:** All of the distributions seem to fit the completion data well. Visually, it seems the normal distribution fits the data best from the historgram. Exampining the CDFs, all seem to fit the data well with logistic matching the empirical CDF best.
+
+
+```{r}
+RunYardsPerPlay <- pbp_runs$yards_gained
+PassYardsPerPlay<- pbp_pass$yards_gained
+YardsPerCompletion <- pbp_completion$yards_gained
+
+#for nonshifted distribution runs
+fnRun <- fitdist(RunYardsPerPlay, "norm")
+fuRun <- fitdist(RunYardsPerPlay, "unif")
+flRun <- fitdist(RunYardsPerPlay, "logis"
+                 )
+par(mfrow = c(2, 2))
+plotRun.legend <- c("normal", "unif", "logis")
+denscomp(list(fnRun, fuRun, flRun), legendtext = plotRun.legend)
+qqcomp(list(fnRun, fuRun, flRun), legendtext = plotRun.legend)
+cdfcomp(list(fnRun, fuRun, flRun), legendtext = plotRun.legend)
+ppcomp(list(fnRun, fuRun, flRun), legendtext = plotRun.legend)
+```
+
+```{r}
+#for nonshifted distribution pass COMPLETIONS
+fnCompl <- fitdist(YardsPerCompletion, "norm")
+fuCompl <- fitdist(YardsPerCompletion, "unif")
+flCompl <- fitdist(YardsPerCompletion, "logis")
+
+par(mfrow = c(2, 2))
+plotCompl.legend <- c("normal", "unif", "logis")
+denscomp(list(fnCompl, fuCompl, flCompl), legendtext = plotCompl.legend)
+qqcomp(list(fnCompl, fuCompl, flCompl), legendtext = plotCompl.legend)
+cdfcomp(list(fnCompl, fuCompl, flCompl), legendtext = plotCompl.legend)
+ppcomp(list(fnCompl, fuCompl, flCompl), legendtext = plotCompl.legend)
+```
+
+```{r}
+#for shifted distribution run
+fnRun.S <- fitdist(RunInsideYardsPerPlay, "norm")
+flRun.S <- fitdist(RunInsideYardsPerPlay, "logis")
+fpRun.S <- fitdist(RunInsideYardsPerPlay.Shifted, "pois")
+fwRun.S <- fitdist(RunInsideYardsPerPlay.Shifted, "weibull")
+
+#DISCRETE DISTRIBUTIONS
+pdf("RunFittingDiscrete.pdf")
+par(mfrow = c(2, 2))
+plotComplS.legend <- c("poisson", "weibull")
+denscomp(list(fpRun.S, fwRun.S), legendtext = plotComplS.legend)
+qqcomp(list(fpRun.S, fwRun.S), legendtext = plotComplS.legend)
+cdfcomp(list(fpRun.S, fwRun.S), legendtext = plotComplS.legend)
+ppcomp(list(fpRun.S, fwRun.S), legendtext = plotComplS.legend)
+```
+
+```{r}
+#To see continuous histogram
+pdf("RunFittingContinuous.pdf")
+par(mfrow = c(2, 2))
+plotComplS.legend <- c("normal", "logistic")
+denscomp(list(fnRun.S, flRun.S), legendtext = plotComplS.legend)
+qqcomp(list(fnRun.S, flRun.S), legendtext = plotComplS.legend)
+cdfcomp(list(fnRun.S, flRun.S), legendtext = plotComplS.legend)
+ppcomp(list(fnRun.S, flRun.S), legendtext = plotComplS.legend)
+```
+
+**Runs:** All of the distributions seem to fit the completion data well. Visually, it seems the Logistic fits the data best from the historgram. Exampining the CDFs, all seem to fit the data well with logistic matching the empirical CDF best.
+
+
+```{r}
+#Run (Non shifted):
+print("Run (Non-Shifted)")
+gofstat(list(fnRun, flRun))
+
+#Run (Shifted):
+print("Run (Shifted)")
+gofstat(list(fpRun.S, fwRun.S))
+
+#Pass Completions (Non shifted):
+print("Pass Completions (Non-Shifted)")
+gofstat(list(fnCompl, flCompl))
+
+#Pass Completions (Shifted):
+print("Pass Completions (Shifted)")
+gofstat(list(fpCompl.S, fwCompl.S))
+```
+**Runs:** Since the logistic distribution has the min AIC, BIC, and minimum goodness-of-fit statistics, we will choose the logistics distribution for both completions and run plays. This DOES NOT require us to shift the data. 
+
+
+
+```{r}
+#fitting distribution and printing statistics
+
+#COMPLETIONS
+fitdist(YardsPerCompletion, "logis")
+
+#RUNS
+fitdist(RunYardsPerPlay, "logis")
+
+
+#Time component (for different scenarios), distributions (make up parameters for each), make yards more discrete, ending criteria, may want to implement time outs down the line
+```
+
+

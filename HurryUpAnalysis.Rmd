@@ -1,0 +1,221 @@
+---
+title: "2MinuteDrill"
+author: "Logan Robert McGuire"
+date: "March 8, 2021"
+output: html_document
+---
+
+```{r}
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(stats4)
+library(vcd)
+library(fitdistrplus)
+library(binom)
+
+seasons <- 2010:2020
+#pbp <- purrr::map_df(seasons, function(x) {
+#  readr::read_csv(
+#    glue::glue("https://raw.githubusercontent.com/guga31bb/nflfastR-data/master/data/play_by_play_{x}.csv.gz")
+#  )
+#})
+
+
+```
+
+
+```{r}
+pbp_nohuddle <- pbp_nonspecial %>%
+  filter(no_huddle == 1)
+
+
+pbp_HUrounded = pbp_nohuddle %>% group_by(game_id) %>% mutate(diff = c(NA,(ceiling((diff(quarter_seconds_remaining)/7)))*7))
+pbp_HUrounded = pbp_HUrounded[!(pbp_HUrounded$diff == "NA" | pbp_HUrounded$diff < 0), ]
+pbp_HUrounded$diff[which(pbp_HUrounded$diff == 0)] = 7
+
+pbp_nohuddlePass <- pbp_nohuddle %>%
+  filter(play_type == 'pass')
+pbp_nohuddleRun <- pbp_nohuddle %>%
+  filter(play_type == 'run')
+
+pbp_HURunInside <- pbp_nohuddle %>%
+  filter(run_gap == 'guard' | run_gap == 'tackle')
+pbp_HURunOutside <- pbp_nohuddle %>%
+  filter(run_gap == 'end')
+pbp_HUPassShort <- pbp_nohuddle %>%
+  filter(pass_length == 'short' & complete_pass == 1)
+pbp_HUPassDeep <- pbp_nohuddle %>%
+  filter(pass_length == 'deep' & complete_pass == 1)
+pbp_HUIncPassShort <- pbp_nohuddle %>%
+  filter(pass_length == 'short' & complete_pass == 0)
+pbp_HUIncPassDeep <- pbp_nohuddle %>%
+  filter(pass_length == 'deep' & complete_pass == 0)
+
+hist(pbp_HURunInside$yards_gained, xlab="Yards", 
+     main = "Yardage Gained on Inside Run Plays: Hurry Up", breaks = 100, freq = FALSE, xlim = c(0,100))
+hist(pbp_HURunOutside$yards_gained, xlab="Yards", 
+     main = "Yardage Gained on Outside Run Plays: Hurry Up", breaks = 100, freq = FALSE, xlim = c(0,100))
+hist(pbp_HUPassShort$yards_gained, xlab="Yards", 
+     main = "Yardage Gained on Short Pass Plays: Hurry Up", breaks = 100, freq = FALSE, xlim = c(0,100))
+hist(pbp_HUPassDeep$yards_gained, xlab="Yards", 
+     main = "Yardage Gained on Deep Pass Plays: Hurry Up", breaks = 100, freq = FALSE, xlim = c(0,100))
+```
+
+```{r}
+#fitting distribution and printing statistics
+
+#Run Inside Hurry Up
+fitdistrplus::fitdist(pbp_HURunInside$yards_gained, "logis")
+
+#Run Outside Hurry Up
+fitdistrplus::fitdist(pbp_HURunOutside$yards_gained, "logis")
+
+#Pass Short Hurry Up
+fitdistrplus::fitdist(pbp_HUPassShort$yards_gained, "logis")
+
+#Pass Deep Hurry Up
+fitdistrplus::fitdist(pbp_HUPassDeep$yards_gained, "logis")
+```
+
+
+```{r}
+pbp_HUPassShortIncom <- pbp_nohuddlePass %>%
+  filter(pass_length == 'short' & complete_pass == 0)
+
+HUShortCompletionCount = nrow(pbp_HUPassShort)
+HUShortIncompletionCount = nrow(pbp_HUPassShortIncom)
+total_HUshort_count= HUShortIncompletionCount + HUShortCompletionCount
+binom.confint(HUShortCompletionCount, total_HUshort_count)
+```
+
+```{r}
+pbp_HUPassDeepIncom <- pbp_nohuddlePass %>%
+  filter(pass_length == 'deep' & complete_pass == 0)
+
+HUDeepCompletionCount = nrow(pbp_HUPassDeep)
+HUDeepIncompletionCount = nrow(pbp_HUPassDeepIncom)
+total_HUdeep_count= HUDeepIncompletionCount + HUDeepCompletionCount
+binom.confint(HUDeepCompletionCount, total_HUdeep_count)
+```
+
+```{r}
+pbp_HUPassDeepInterception <- pbp_nohuddlePass %>%
+  filter(pass_length == 'deep' & interception == 1)
+pbp_HUPassDeepFumble <- pbp_nohuddlePass %>%
+  filter(pass_length == 'deep' & fumble_lost == 1)
+
+HUDeepIntCount = nrow(pbp_HUPassDeepInterception)
+HUDeepFumbleCount = nrow(pbp_HUPassDeepFumble)
+HUtotal_deep_turnover = HUDeepIntCount + HUDeepFumbleCount
+binom.confint(HUtotal_deep_turnover,HUDeepCompletionCount)
+```
+
+```{r}
+pbp_HUPassShortInterception <- pbp_nohuddlePass %>%
+  filter(pass_length == 'short' & interception == 1)
+pbp_HUPassShortFumble <- pbp_nohuddlePass %>%
+  filter(pass_length == 'short' & fumble_lost == 1)
+
+HUShortIntCount = nrow(pbp_HUPassShortInterception)
+HUShortFumbleCount = nrow(pbp_HUPassShortFumble)
+HUtotal_short_turnover = HUShortIntCount + HUShortFumbleCount
+binom.confint(HUtotal_short_turnover,HUShortCompletionCount)
+```
+
+
+```{r}
+pbp_HURunInsideFumble <- pbp_HURunInside %>%
+  filter(fumble_lost == 1)
+
+HURunInsideCount = nrow(pbp_HURunInside)
+HURunInsideFumbleCount = nrow(pbp_HURunInsideFumble)
+binom.confint(HURunInsideFumbleCount,HURunInsideCount)
+```
+
+
+```{r}
+pbp_HURunOutsideFumble <- pbp_HURunOutside %>%
+  filter(fumble_lost == 1)
+
+HURunOutsideCount = nrow(pbp_HURunOutside)
+HURunOutsideFumbleCount = nrow(pbp_HURunOutsideFumble)
+binom.confint(HURunOutsideFumbleCount,HURunOutsideCount)
+```
+
+
+```{r}
+#grabs time per play for all plays of given play type
+TimeForHURunInside <- pbp_HURunInside$diff
+TimeForHURunOutside <-pbp_HURunOutside$diff
+TimeForHUPassShort <- pbp_HUPassShort$diff
+TimeForHUPassDeep <- pbp_HUPassDeep$diff
+TimeForHUIncPassShort <- pbp_HUIncPassShort$diff
+TimeForHUIncPassDeep <- pbp_HUIncPassDeep$diff
+
+#graphs time per play for each type
+hist(TimeForHURunInside, xlab="Seconds Per Play", 
+     main = "Time Per Play for Inside Runs: Hurry Up", breaks = 50, freq = FALSE, xlim = c(0,60))
+
+hist(TimeForHURunOutside, xlab="Seconds Per Play", 
+     main = "Time Per Play for Outside Runs: Hurry Up", breaks = 50, freq = FALSE, xlim = c(0,60))
+
+hist(TimeForHUPassShort, xlab="Seconds Per Play", 
+     main = "Time Per Play for Short Completions: Hurry Up", breaks = 50, freq = FALSE, xlim = c(0,60))
+
+hist(TimeForHUPassDeep, xlab="Seconds Per Play", 
+     main = "Time Per Play for Deep Completions: Hurry Up", breaks = 50, freq = FALSE, xlim = c(0,60))
+
+hist(TimeForHUIncPassShort, xlab="Seconds Per Play", 
+     main = "Time Per Play for Short Incompletions: Hurry Up", breaks = 50, freq = FALSE, xlim = c(0,60))
+
+hist(TimeForHUIncPassDeep, xlab="Seconds Per Play", 
+     main = "Time Per Play for Deep Incompletions: Hurry Up", breaks = 50, freq = FALSE, xlim = c(0,60))
+```
+
+
+```{r}
+#GENERAL PLAYS
+pbp_HURunInsideRounded <- pbp_HUrounded %>%
+  filter(run_gap == 'guard' | run_gap == 'tackle')
+pbp_HURunInsideRounded <- pbp_HURunInsideRounded %>%
+  filter(diff <= 60)
+pbp_HURunOutsideRounded <- pbp_HUrounded %>%
+  filter(run_gap == 'end' & diff <= 60)
+pbp_HUPassShortRounded <- pbp_HUrounded %>%
+  filter(pass_length == 'short' & complete_pass == 1 & diff <= 60)
+pbp_HUPassDeepRounded <- pbp_HUrounded %>%
+  filter(pass_length == 'deep' & complete_pass == 1 & diff <= 60)
+pbp_HUIncPassShortRounded <- pbp_HUrounded %>%
+  filter(pass_length == 'short' & complete_pass == 0 & diff <= 60)
+pbp_HUIncPassDeepRounded <- pbp_HUrounded %>%
+  filter(pass_length == 'deep' & complete_pass == 0 & diff <= 60)
+
+#grabs time per play for all plays of given play type
+RoundedTimeForHURunInside <- pbp_HURunInsideRounded$diff
+prop.table(table(RoundedTimeForHURunInside))
+RoundedTimeForHURunOutside <-pbp_HURunOutsideRounded$diff
+prop.table(table(RoundedTimeForHURunOutside))
+RoundedTimeForHUPassShort <- pbp_HUPassShortRounded$diff
+prop.table(table(RoundedTimeForHUPassShort))
+RoundedTimeForHUPassDeep <- pbp_HUPassDeepRounded$diff
+prop.table(table(RoundedTimeForHUPassDeep))
+RoundedTimeForHUIncPassShort <- pbp_HUIncPassShortRounded$diff
+prop.table(table(RoundedTimeForHUIncPassShort))
+RoundedTimeForHUIncPassDeep <- pbp_HUIncPassDeepRounded$diff
+prop.table(table(RoundedTimeForHUIncPassDeep))
+
+#graphs time per play for each type
+hist(RoundedTimeForHURunInside, xlab="Seconds Per Play", 
+     main = "Rounded Time Per Play for Inside Runs: Hurry Up", breaks = 50, freq = FALSE, xlim = c(0,60))
+
+hist(RoundedTimeForHURunOutside, xlab="Seconds Per Play", 
+     main = "Rounded Time Per Play for Outside Runs: Hurry Up", breaks = 50, freq = FALSE, xlim = c(0,60))
+
+hist(RoundedTimeForHUPassShort, xlab="Seconds Per Play", 
+     main = "Rounded Time Per Play for Short Completions: Hurry Up", breaks = 50, freq = FALSE, xlim = c(0,60))
+
+hist(RoundedTimeForHUPassDeep, xlab="Seconds Per Play", 
+     main = "Rounded Time Per Play for Deep Completions: Hurry Up", breaks = 50, freq = FALSE, xlim = c(0,60))
+```
+

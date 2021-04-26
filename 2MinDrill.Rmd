@@ -1,0 +1,248 @@
+---
+title: "2MinuteDrill"
+author: "Logan Robert McGuire"
+date: "March 8, 2021"
+output: html_document
+---
+
+```{r}
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(stats4)
+library(vcd)
+library(fitdistrplus)
+library(binom)
+
+seasons <- 2010:2020
+#pbp <- purrr::map_df(seasons, function(x) {
+#  readr::read_csv(
+#    glue::glue("https://raw.githubusercontent.com/guga31bb/nflfastR-data/master/data/play_by_play_{x}.csv.gz")
+#  )
+#})
+
+
+```
+
+
+```{r}
+pbp_2min <- pbp_nonspecial  %>%
+  filter(game_seconds_remaining <= 120)
+pbp_2min_closegame <- pbp_2min  %>%
+  filter((defteam_score-posteam_score) <= 8 & (defteam_score-posteam_score) >= 0)
+pbp_2min_closegameROUNDED <- pbp_rounded  %>%
+  filter(game_seconds_remaining <= 120 & (defteam_score-posteam_score) <= 8 & (defteam_score-posteam_score) >= 0)
+```
+
+
+```{r}
+RunInside_2MCG <- pbp_2min_closegame %>%
+  filter(run_gap == 'guard' | run_gap == 'tackle')
+RunOutside_2MCG <- pbp_2min_closegame %>%
+  filter(run_gap == 'end')
+ComplShort_2MCG <- pbp_2min_closegame %>%
+  filter(pass_length == 'short' & complete_pass == 1)
+ComplDeep_2MCG <- pbp_2min_closegame %>%
+  filter(pass_length == 'deep' & complete_pass == 1)
+
+hist(RunInside_2MCG$yards_gained, xlab="Yards", 
+     main = "Yardage Gained on Inside Run Plays", breaks = 100, freq = FALSE, xlim = c(0,100))
+hist(RunOutside_2MCG$yards_gained, xlab="Yards", 
+     main = "Yardage Gained on Outside Run Plays", breaks = 100, freq = FALSE, xlim = c(0,100))
+hist(ComplShort_2MCG$yards_gained, xlab="Yards", 
+     main = "Yardage Gained on Short Pass Plays", breaks = 100, freq = FALSE, xlim = c(0,100))
+hist(ComplDeep_2MCG$yards_gained, xlab="Yards", 
+     main = "Yardage Gained on Deep Pass Plays", breaks = 100, freq = FALSE, xlim = c(0,100))
+
+#fitting distribution and printing statistics
+
+#Run Inside
+fitdistrplus::fitdist(RunInside_2MCG$yards_gained, "logis")
+
+#Run Outside
+fitdistrplus::fitdist(RunOutside_2MCG$yards_gained, "logis")
+
+#Pass Short
+fitdistrplus::fitdist(ComplShort_2MCG$yards_gained, "logis")
+
+#Pass Deep
+fitdistrplus::fitdist(ComplDeep_2MCG$yards_gained, "logis")
+
+```
+```{r}
+pdf("PlayDistributions2MCG.pdf")
+par(mfrow = c(2,2))
+
+hist(RunInside_2MCG$yards_gained, xlab="Yards", 
+     main = "Yardage Gained on Inside Runs", breaks = 100, freq = FALSE, xlim = c(0,100))
+hist(RunOutside_2MCG$yards_gained, xlab="Yards", 
+     main = "Yardage Gained on Outside Run", breaks = 100, freq = FALSE, xlim = c(0,100))
+hist(ComplShort_2MCG$yards_gained, xlab="Yards", 
+     main = "Yardage Gained on Short Completions", breaks = 100, freq = FALSE, xlim = c(0,100))
+hist(ComplDeep_2MCG$yards_gained, xlab="Yards", 
+     main = "Yardage Gained on Deep Completions", breaks = 100, freq = FALSE, xlim = c(0,100))
+dev.off()
+```
+
+
+
+```{r}
+IncomplShort_2MCG <- pbp_2min_closegame %>%
+  filter(pass_length == 'short' & complete_pass == 0 & qb_spike == 0)
+
+ShortCompletionCount = nrow(ComplShort_2MCG)
+ShortIncompletionCount = nrow(IncomplShort_2MCG)
+total_short_count= ShortIncompletionCount + ShortCompletionCount
+binom.confint(ShortCompletionCount, total_short_count)
+
+```
+
+```{r}
+IncomplDeep_2MCG <- pbp_2min_closegame %>%
+  filter(pass_length == 'deep' & complete_pass == 0 & qb_spike == 0)
+
+DeepCompletionCount = nrow(ComplDeep_2MCG)
+DeepIncompletionCount = nrow(IncomplDeep_2MCG)
+total_deep_count= DeepIncompletionCount + DeepCompletionCount
+binom.confint(DeepCompletionCount, total_deep_count)
+```
+
+
+
+```{r}
+IntDeep_2MCG <- pbp_2min_closegame %>%
+  filter(pass_length == 'deep' & interception == 1)
+FumbleDeep_2MCG <- pbp_2min_closegame %>%
+  filter(pass_length == 'deep' & fumble_lost == 1)
+
+DeepIntCount = nrow(IntDeep_2MCG)
+DeepFumbleCount = nrow(FumbleDeep_2MCG)
+total_deep_turnover = DeepIntCount + DeepFumbleCount
+binom.confint(total_deep_turnover,total_deep_count)
+```
+
+```{r}
+IntShort_2MCG <- pbp_2min_closegame %>%
+  filter(pass_length == 'short' & interception == 1)
+FumbleShort_2MCG <- pbp_2min_closegame %>%
+  filter(pass_length == 'short' & fumble_lost == 1)
+
+ShortIntCount = nrow(IntShort_2MCG)
+ShortFumbleCount = nrow(FumbleShort_2MCG)
+total_short_turnover = ShortIntCount + ShortFumbleCount
+binom.confint(total_short_turnover,total_short_count)
+```
+
+```{r}
+RunInsideFumb_2MCG <- RunInside_2MCG %>%
+  filter(fumble_lost == 1)
+
+
+RunInsideCount = nrow(RunInside_2MCG)
+RunInsideFumbleCount = nrow(RunInsideFumb_2MCG)
+binom.confint(RunInsideFumbleCount,RunInsideCount)
+```
+
+
+```{r}
+RunOutsideFumb_2MCG <- RunOutside_2MCG %>%
+  filter(fumble_lost == 1)
+
+RunOutsideCount = nrow(RunOutside_2MCG)
+RunInsideFumbleCount = nrow(RunOutsideFumb_2MCG)
+binom.confint(RunInsideFumbleCount,RunInsideCount)
+
+```
+
+```{r}
+#grabs time per play for all plays of given play type
+TimeFor2MCGRunInside <- RunInside_2MCG$diff
+TimeFor2MCGRunOutside <- RunOutside_2MCG$diff
+TimeFor2MCGComplShort <-ComplShort_2MCG$diff
+TimeFor2MCGComplDeep <-ComplDeep_2MCG$diff
+TimeFor2MCGIncomplShort <-IncomplShort_2MCG$diff
+TimeFor2MCGIncomplDeep <-IncomplDeep_2MCG$diff
+
+#graphs time per play for each type
+hist(TimeFor2MCGRunInside, xlab="Seconds Per Play", 
+     main = "2 MIN CLOSE GAME, OFFENSE IS LOSING: Time Per Play for Run Inside", breaks = 50, freq = FALSE, xlim = c(0,100))
+
+hist(TimeFor2MCGRunOutside, xlab="Seconds Per Play", 
+     main = "2 MIN CLOSE GAME, OFFENSE IS LOSING: Time Per Play for Run Outside", breaks = 50, freq = FALSE, xlim = c(0,100))
+
+hist(TimeFor2MCGComplShort, xlab="Seconds Per Play", 
+     main = "2 MIN CLOSE GAME, OFFENSE IS LOSING: Time Per Play for Short Completions", breaks = 50, freq = FALSE, xlim = c(0,100))
+
+hist(TimeFor2MCGComplDeep, xlab="Seconds Per Play", 
+     main = "2 MIN CLOSE GAME, OFFENSE IS LOSING: Time Per Play for Deep Completions", breaks = 50, freq = FALSE, xlim = c(0,100))
+
+hist(TimeFor2MCGIncomplShort, xlab="Seconds Per Play", 
+     main = "2 MIN CLOSE GAME, OFFENSE IS LOSING: Time Per Play for Short Incompletions", breaks = 50, freq = FALSE, xlim = c(0,100))
+
+hist(TimeFor2MCGIncomplDeep, xlab="Seconds Per Play", 
+     main = "2 MIN CLOSE GAME, OFFENSE IS LOSING: Time Per Play for Deep Incompletions", breaks = 50, freq = FALSE, xlim = c(0,100))
+```
+
+```{r}
+RunInside_2MCG_Rounded <- pbp_2min_closegameROUNDED %>%
+  filter(run_gap == 'guard' | run_gap == 'tackle')
+RunOutside_2MCG_Rounded <- pbp_2min_closegameROUNDED %>%
+  filter(run_gap == 'end')
+ComplShort_2MCG_Rounded <- pbp_2min_closegameROUNDED %>%
+  filter(pass_length == 'short' & complete_pass == 1)
+ComplDeep_2MCG_Rounded <- pbp_2min_closegameROUNDED %>%
+  filter(pass_length == 'deep' & complete_pass == 1)
+IncomplShort_2MCG_Rounded <- pbp_2min_closegameROUNDED %>%
+  filter(pass_length == 'short' & complete_pass == 0 & qb_spike == 0)
+IncomplDeep_2MCG_Rounded <- pbp_2min_closegameROUNDED %>%
+  filter(pass_length == 'deep' & complete_pass == 0 & qb_spike == 0)
+
+#grabs time per play for all plays of given play type
+RoundedTimeForRunInside2MCG <- RunInside_2MCG_Rounded$diff
+prop.table(table(RoundedTimeForRunInside2MCG))
+
+RoundedTimeForRunOutside2MCG <- RunOutside_2MCG_Rounded$diff
+prop.table(table(RoundedTimeForRunOutside2MCG))
+
+RoundedTimeForComplShort2MCG <- ComplShort_2MCG_Rounded$diff
+prop.table(table(RoundedTimeForComplShort2MCG))
+
+RoundedTimeForComplDeep2MCG <- ComplDeep_2MCG_Rounded$diff
+prop.table(table(RoundedTimeForComplDeep2MCG))
+
+RoundedTimeForIncomplShort2MCG <- IncomplShort_2MCG_Rounded$diff
+prop.table(table(RoundedTimeForIncomplShort2MCG))
+
+RoundedTimeForIncomplDeep2MCG <- IncomplDeep_2MCG_Rounded$diff
+prop.table(table(RoundedTimeForIncomplDeep2MCG))
+
+#graphs time per play for each type
+hist(RoundedTimeForRunInside2MCG, xlab="Seconds Per Play", 
+     main = "Rounded Time Per Play for Inside Runs (2MCG)", breaks = 50, freq = FALSE, xlim = c(0,60))
+
+hist(RoundedTimeForRunOutside2MCG, xlab="Seconds Per Play", 
+     main = "Rounded Time Per Play for Outside Runs (2MCG)", breaks = 50, freq = FALSE, xlim = c(0,60))
+
+hist(RoundedTimeForComplShort2MCG, xlab="Seconds Per Play", 
+     main = "Rounded Time Per Play for Short Completions (2MCG)", breaks = 50, freq = FALSE, xlim = c(0,60))
+
+hist(RoundedTimeForComplDeep2MCG, xlab="Seconds Per Play", 
+     main = "Rounded Time Per Play for Deep Completions (2MCG)", breaks = 50, freq = FALSE, xlim = c(0,60))
+
+pdf("RITimeDistributionENDGAME.pdf")
+par(mfrow = c(2, 1))
+hist(TimeFor2MCGRunInside, xlab="Seconds Per Play", 
+     main = "Time Per Play for Inside Runs", breaks = 50, freq = FALSE, xlim = c(0,60))
+hist(RoundedTimeForRunInside2MCG, xlab="Seconds Per Play", 
+     main = "Rounded Time Per Play for Inside Runs", breaks = 50, freq = FALSE, xlim = c(0,60))
+dev.off()
+```
+
+
+
+
+
+
+
+
+

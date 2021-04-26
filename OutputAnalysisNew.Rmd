@@ -1,0 +1,838 @@
+---
+title: "OutputAnalysis"
+output: html_document
+---
+
+```{r}
+library(readr)
+library(dplyr)
+library(openxlsx)
+library(plot3D)
+library(ggplot2)
+#data20 = read.xlsx('20Tick_ALLDATA.xlsx')
+#data40 = read.xlsx('40Tick_ALLDATA.xlsx')
+#data60 = read.xlsx('60Tick_ALLDATA.xlsx')
+#data80 = read.xlsx('80Tick_ALLDATA.xlsx')
+#data100 = read.xlsx('100Tick_ALLDATA.xlsx')
+#data120 = read.xlsx('120Tick_ALLDATA.xlsx')
+#data130 = read.xlsx('130Tick_ALLDATA.xlsx')
+#data = rbind(data20,data40,data60,data80,data100,data120,data130)
+#data_noST <- data %>%
+#  filter(`2MIN.SUM` != 'ST')
+#write.csv(data_noST, "AllDataAllTicksAllDowns.csv")
+#data_binderclip <- data_noST %>%
+#  filter(DOWN == 1 & FD_DIST == 3)
+#write.csv(data_binderclip, "AllDataBinderClip.csv")
+```
+
+```{r}
+#Hold all variables constant except for time and endzone distance in each data set. Vary each data set by score differential
+data2_3dDown10 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3  & Score == -10)
+data2_3dDown9 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3  & Score == -9)
+data2_3dDown8 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3  & Score == -8)
+data2_3dDown7 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3  & Score == -7)
+data2_3dDown6 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3  & Score == -6)
+data2_3dDown5 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3  & Score == -5)
+data2_3dDown4 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3  & Score == -4)
+data2_3dDown3 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3  & Score == -3)
+data2_3dDown2 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3  & Score == -2)
+data2_3dDown1 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3  & Score == -1)
+data2_3dDown0 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3  & Score == 0)
+data2_3dUp1 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3  & Score == 1)
+data2_3dUp2 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3  & Score == 2)
+data2_3dUp3 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3  & Score == 3)
+data2_3dUp4 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3  & Score == 4)
+data2_3dUp5 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3  & Score == 5)
+data2_3dUp6 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3  & Score == 6)
+data2_3dUp7 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3  & Score == 7)
+data2_3dUp8 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3  & Score == 8)
+data2_3dUp9 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3  & Score == 9)
+data2_3dUp10 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3  & Score == 10)
+
+#Hold all variables constant except for time in each data set. Vary each data set Score Diff
+data_Down10 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 20 & Score == -10)
+data_Down9 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 20 & Score == -9)
+data_Down8 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 20 & Score == -8)
+data_Down7 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 20 & Score == -7)
+data_Down6 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 20 & Score == -6)
+data_Down5 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 20 & Score == -5)
+data_Down4 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 20 & Score == -4)
+data_Down3 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 20 & Score == -3)
+data_Down2 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 20 & Score == -2)
+data_Down1 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 20 & Score == -1)
+data_Down0 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 20 & Score == 0)
+data_Up1 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 20 & Score == 1)
+data_Up2 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 20 & Score == 2)
+data_Up3 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 20 & Score == 3)
+data_Up4 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 20 & Score == 4)
+data_Up5 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 20 & Score == 5)
+data_Up6 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 20 & Score == 6)
+data_Up7 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 20 & Score == 7)
+data_Up8 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 20 & Score == 8)
+data_Up9 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 20 & Score == 9)
+data_Up10 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 20 & Score == 10)
+
+#Hold all variables constant except for time in each data set. Vary each data set by EZ Dist
+data_29Away <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 29 & Score == 0); 
+data_29Away = data_29Away[order(data_29Away$TIME),]
+
+data_25Away <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 25 & Score == 0)
+data_25Away = data_25Away[order(data_25Away$TIME),]
+
+data_20Away <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 20 & Score == 0)
+data_20Away = data_20Away[order(data_20Away$TIME),]
+
+data_15Away <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 15 & Score == 0)
+data_15Away = data_15Away[order(data_15Away$TIME),]
+
+data_10Away <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 10 & Score == 0)
+data_10Away = data_10Away[order(data_10Away$TIME),]
+
+data_05Away <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 05 & Score == 0)
+data_05Away = data_05Away[order(data_05Away$TIME),]
+
+#Hold all variables constant except for time in each data set. Vary each data set by EZ Dist
+data_29AwayM7 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 29 & Score == -7); 
+data_29Away = data_29Away[order(data_29Away$TIME),]
+
+data_25AwayM7 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 25 & Score == -7)
+data_25Away = data_25Away[order(data_25Away$TIME),]
+
+data_20AwayM7 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 20 & Score == -7)
+data_20Away = data_20Away[order(data_20Away$TIME),]
+
+data_15AwayM7 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 15 & Score == -7)
+data_15Away = data_15Away[order(data_15Away$TIME),]
+
+data_10AwayM7 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 10 & Score == -7)
+data_10Away = data_10Away[order(data_10Away$TIME),]
+
+data_05AwayM7 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 05 & Score == -7)
+data_05Away = data_05Away[order(data_05Away$TIME),]
+
+data_29AwayD1 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 29 & Score == -1); 
+data_29Away = data_29Away[order(data_29Away$TIME),]
+
+data_25AwayD1 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 25 & Score == -1)
+data_25Away = data_25Away[order(data_25Away$TIME),]
+
+data_20AwayD1 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 20 & Score == -1)
+data_20Away = data_20Away[order(data_20Away$TIME),]
+
+data_15AwayD1 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 15 & Score == -1)
+data_15Away = data_15Away[order(data_15Away$TIME),]
+
+data_10AwayD1 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 10 & Score == -1)
+data_10Away = data_10Away[order(data_10Away$TIME),]
+
+data_05AwayD1 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 05 & Score == -1)
+data_05Away = data_05Away[order(data_05Away$TIME),]
+
+data_29AwayU1 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 29 & Score == 1); 
+data_29Away = data_29Away[order(data_29Away$TIME),]
+
+data_25AwayU1 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 25 & Score == 1)
+data_25Away = data_25Away[order(data_25Away$TIME),]
+
+data_20AwayU1 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 20 & Score == 1)
+data_20Away = data_20Away[order(data_20Away$TIME),]
+
+data_15AwayU1 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 15 & Score == 1)
+data_15Away = data_15Away[order(data_15Away$TIME),]
+
+data_10AwayU1 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 10 & Score == 1)
+data_10Away = data_10Away[order(data_10Away$TIME),]
+
+data_05AwayU1 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 05 & Score == 1)
+data_05Away = data_05Away[order(data_05Away$TIME),]
+
+#Hold all variables constant except for time in each data set. Vary each data set by EZ Dist
+data_29AwayU7 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 29 & Score == 7); 
+data_29Away = data_29Away[order(data_29Away$TIME),]
+
+data_25AwayU7 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 25 & Score == 7)
+data_25Away = data_25Away[order(data_25Away$TIME),]
+
+data_20AwayU7 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 20 & Score == 7)
+data_20Away = data_20Away[order(data_20Away$TIME),]
+
+data_15AwayU7 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 15 & Score == 7)
+data_15Away = data_15Away[order(data_15Away$TIME),]
+
+data_10AwayU7 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 10 & Score == 7)
+data_10Away = data_10Away[order(data_10Away$TIME),]
+
+data_05AwayU7 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 05 & Score == 7)
+data_05Away = data_05Away[order(data_05Away$TIME),]
+
+data_29AwayU4 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 29 & Score == 4); 
+data_29Away = data_29Away[order(data_29Away$TIME),]
+
+data_25AwayU4 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 25 & Score == 4)
+data_25Away = data_25Away[order(data_25Away$TIME),]
+
+data_20AwayU4 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 20 & Score == 4)
+data_20Away = data_20Away[order(data_20Away$TIME),]
+
+data_15AwayU4 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 15 & Score == 4)
+data_15Away = data_15Away[order(data_15Away$TIME),]
+
+data_10AwayU4 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 10 & Score == 4)
+data_10Away = data_10Away[order(data_10Away$TIME),]
+
+data_05AwayU4 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 05 & Score == 4)
+data_05Away = data_05Away[order(data_05Away$TIME),]
+
+data_29AwayU10 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 29 & Score == 10); 
+data_29Away = data_29Away[order(data_29Away$TIME),]
+
+data_25AwayU10 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 25 & Score == 10)
+data_25Away = data_25Away[order(data_25Away$TIME),]
+
+data_20AwayU10 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 20 & Score == 10)
+data_20Away = data_20Away[order(data_20Away$TIME),]
+
+data_15AwayU10 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 15 & Score == 10)
+data_15Away = data_15Away[order(data_15Away$TIME),]
+
+data_10AwayU10 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 10 & Score == 10)
+data_10Away = data_10Away[order(data_10Away$TIME),]
+
+data_05AwayU10 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 05 & Score == 10)
+data_05Away = data_05Away[order(data_05Away$TIME),]
+
+data_29AwayD10 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 29 & Score == -10); 
+data_29Away = data_29Away[order(data_29Away$TIME),]
+
+data_25AwayD10 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 25 & Score == -10)
+data_25Away = data_25Away[order(data_25Away$TIME),]
+
+data_20AwayD10 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 20 & Score == -10)
+data_20Away = data_20Away[order(data_20Away$TIME),]
+
+data_15AwayD10 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 15 & Score == -10)
+data_15Away = data_15Away[order(data_15Away$TIME),]
+
+data_10AwayD10 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 10 & Score == -10)
+data_10Away = data_10Away[order(data_10Away$TIME),]
+
+data_05AwayD10 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 05 & Score == -10)
+data_05Away = data_05Away[order(data_05Away$TIME),]
+
+data_29AwayD4 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 29 & Score == -4); 
+data_29Away = data_29Away[order(data_29Away$TIME),]
+
+data_25AwayD4 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 25 & Score == -4)
+data_25Away = data_25Away[order(data_25Away$TIME),]
+
+data_20AwayD4 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 20 & Score == -4)
+data_20Away = data_20Away[order(data_20Away$TIME),]
+
+data_15AwayD4 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 15 & Score == -4)
+data_15Away = data_15Away[order(data_15Away$TIME),]
+
+data_10AwayD4 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 10 & Score == -4)
+data_10Away = data_10Away[order(data_10Away$TIME),]
+
+data_05AwayD4 <- data %>%
+  filter(DOWN == 1 & FD_DIST == 3 & EZ_DIST == 05 & Score == -4)
+data_05Away = data_05Away[order(data_05Away$TIME),]
+
+```
+
+```{r}
+scatter3D(data2_3dDown0$TIME, data2_3dDown0$EZ_DIST, data2_3dDown0$Winprob, colvar = NULL, theta = 20, phi = 30, xlab = 'Time', ylab = 'Distance from Endzone', zlab = 'Win Probability')
+scatter3D(data2_3dDown5$TIME, data2_3dDown5$EZ_DIST, data2_3dDown5$Winprob, colvar = NULL, theta = 20, phi = 30, xlab = 'Time', ylab = 'Distance from Endzone', zlab = 'Win Probability')
+scatter3D(data2_3dDown10$Winprob, data2_3dDown10$EZ_DIST, data2_3dDown10$TIME, colvar = NULL, theta = 20, phi = 30, xlab = 'Win Probability', ylab = 'Distance from Endzone', zlab = 'Time Remaining')
+scatter3D(data2_3dUp5$Winprob, data2_3dUp5$EZ_DIST, data2_3dUp5$TIME, colvar = NULL, theta = 20, phi = 30, xlab = 'Win Probability', ylab = 'Distance from Endzone', zlab = 'Time Remaining')
+scatter3D(data2_3dUp10$Winprob, data2_3dUp10$EZ_DIST, data2_3dUp10$TIME, colvar = NULL, theta = 20, phi = 30, xlab = 'Win Probability', ylab = 'Distance from Endzone', zlab = 'Time Remaining')
+
+```
+
+
+```{r}
+plot(data_29Away$TIME,data_29Away$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from Own 03 yardline in a Tie Game", lwd = 0)
+
+plot(data_25Away$TIME,data_25Away$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from Own 17 yardline in a Tie Game", lwd = 0)
+
+plot(data_20Away$TIME,data_20Away$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from Own 34 yardline in a Tie Game", lwd = 0)
+
+plot(data_15Away$TIME,data_15Away$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from 50 yardline in a Tie Game", lwd = 0)
+
+plot(data_10Away$TIME,data_10Away$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from Opp. 33  yardline in a Tie Game", lwd = 0)
+
+plot(data_05Away$TIME,data_05Away$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from Opp. 17 yardline in a Tie Game", lwd = 0)
+
+plot(data_29Away$TIME,data_29Away$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 3 yardline in a Tie Game", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_25Away$TIME,data_25Away$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 17 yardline in a Tie Game", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_20Away$TIME,data_20Away$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 33 yardline in a Tie Game", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_15Away$TIME,data_15Away$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from 50 yardline in a Tie Game", lwd = 1, type = 'l', ylim = 0:1)
+
+plot(data_29Away$TIME,data_29Away$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from Own 3 yardline in a Tie Game", lwd = 1, type = 'l')
+plot(data_25Away$TIME,data_25Away$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from Own 17 yardline in a Tie Game", lwd = 1, type = 'l')
+plot(data_20Away$TIME,data_20Away$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from Own 33 yardline in a Tie Game", lwd = 1, type = 'l')
+plot(data_15Away$TIME,data_15Away$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from 50 yardline in a Tie Game", lwd = 1, type = 'l')
+plot(data_10Away$TIME,data_10Away$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from Opp 33 yardline in a Tie Game", lwd = 1, type = 'l')
+plot(data_05Away$TIME,data_05Away$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from Opp 17 yardline in a Tie Game", lwd = 1, type = 'l')
+```
+
+
+```{r}
+plot(data_29AwayM7$TIME,data_29AwayM7$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from Own 3 yardline, Down 7", lwd = 0)
+
+plot(data_05AwayM7$TIME,data_05AwayM7$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from Opp. 17 yardline, Down 7", lwd = 0)
+
+jpeg("Down7TimeandWP.jpeg")
+par(mfrow = c(2,2))
+
+plot(data_25AwayM7$TIME,data_25AwayM7$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From Own 17 yardline, Down 7", lwd = 0)
+
+plot(data_20AwayM7$TIME,data_20AwayM7$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From Own 34 yardline, Down 7", lwd = 0)
+
+plot(data_15AwayM7$TIME,data_15AwayM7$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From 50 yardline, Down 7", lwd = 0)
+
+plot(data_10AwayM7$TIME,data_10AwayM7$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From Opp. 33  yardline, Down 7", lwd = 0)
+
+```
+
+```{r}
+jpeg("Down1TimeandWP.jpeg")
+par(mfrow = c(2,2))
+
+plot(data_25AwayU7$TIME,data_25AwayU7$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From Own 17 yardline, Down 1", lwd = 0)
+
+plot(data_20AwayU7$TIME,data_20AwayU7$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From Own 34 yardline, Down 1", lwd = 0)
+
+plot(data_15AwayU7$TIME,data_15AwayU7$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From 50 yardline, Down 1", lwd = 0)
+
+plot(data_10AwayU7$TIME,data_10AwayU7$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From Opp. 33  yardline, Down 1", lwd = 0)
+dev.off()
+
+
+jpeg("Down4TimeandWP.jpeg")
+par(mfrow = c(2,2))
+
+plot(data_25AwayD4$TIME,data_25AwayD4$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From Own 17 yardline, Down 4", lwd = 0)
+
+plot(data_20AwayD4$TIME,data_20AwayD4$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From Own 34 yardline, Down 4", lwd = 0)
+
+plot(data_15AwayD4$TIME,data_15AwayD4$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From 50 yardline, Down 4", lwd = 0)
+
+plot(data_10AwayD4$TIME,data_10AwayD4$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From Opp. 33  yardline, Down 4", lwd = 0)
+dev.off()
+
+jpeg("Down10TimeandWP.jpeg")
+par(mfrow = c(2,2))
+
+plot(data_25AwayD10$TIME,data_25AwayD10$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From Own 17 yardline, Down 10", lwd = 0)
+
+plot(data_20AwayD10$TIME,data_20AwayD10$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From Own 34 yardline, Down 10", lwd = 0)
+
+plot(data_15AwayD10$TIME,data_15AwayD10$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From 50 yardline, Down 10", lwd = 0)
+
+plot(data_10AwayD10$TIME,data_10AwayD10$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From Opp. 33  yardline, Down 10", lwd = 0)
+dev.off()
+```
+
+
+
+```{r}
+jpeg("TiedTimeandWP.jpeg")
+par(mfrow = c(2,2))
+plot(data_25Away$TIME,data_25Away$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From Own 17 yardline, in a Tie Game", lwd = 0)
+plot(data_20Away$TIME,data_20Away$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From Own 34 yardline, in a Tie Game", lwd = 0)
+plot(data_15Away$TIME,data_15Away$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From 50 yardline, in a Tie Game", lwd = 0)
+plot(data_10Away$TIME,data_10Away$Winprob, main = "Win Probability versus Time", xlab = "=Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From Opp. 33  yardline, in a Tie Game", lwd = 0)
+dev.off()
+
+jpeg("Up10TimeandWP.jpeg")
+par(mfrow = c(2,2))
+
+plot(data_25AwayU10$TIME,data_25AwayU10$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From Own 17 yardline, Up 10", lwd = 0)
+
+plot(data_20AwayU10$TIME,data_20AwayU10$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From Own 34 yardline, Up 10", lwd = 0)
+
+plot(data_15AwayU10$TIME,data_15AwayU10$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From 50 yardline, Up 10", lwd = 0)
+
+plot(data_10AwayU10$TIME,data_10AwayU10$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From Opp. 33  yardline, Up 10", lwd = 0)
+dev.off()
+
+
+
+jpeg("Up7TimeandWP.jpeg")
+par(mfrow = c(2,2))
+
+plot(data_25AwayU7$TIME,data_25AwayU7$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From Own 17 yardline, Up 7", lwd = 0)
+
+plot(data_20AwayU7$TIME,data_20AwayU7$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From Own 34 yardline, Up 7", lwd = 0)
+
+plot(data_15AwayU7$TIME,data_15AwayU7$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From 50 yardline, Up 7", lwd = 0)
+
+plot(data_10AwayU7$TIME,data_10AwayU7$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From Opp. 33  yardline, Up 7", lwd = 0)
+dev.off()
+
+jpeg("Up4TimeandWP.jpeg")
+par(mfrow = c(2,2))
+
+plot(data_25AwayU4$TIME,data_25AwayU4$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From Own 17 yardline, Up 4", lwd = 0)
+
+plot(data_20AwayU4$TIME,data_20AwayU4$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From Own 34 yardline, Up 4", lwd = 0)
+
+plot(data_15AwayU4$TIME,data_15AwayU4$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From 50 yardline, Up 4", lwd = 0)
+
+plot(data_10AwayU4$TIME,data_10AwayU4$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From Opp. 33  yardline, Up 4", lwd = 0)
+dev.off()
+
+jpeg("Up1TimeandWP.jpeg")
+par(mfrow = c(2,2))
+
+plot(data_25AwayU1$TIME,data_25AwayU1$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From Own 17 yardline, Up 1", lwd = 0)
+
+plot(data_20AwayU1$TIME,data_20AwayU1$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From Own 34 yardline, Up 1", lwd = 0)
+
+plot(data_15AwayU1$TIME,data_15AwayU1$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From 50 yardline, Up 1", lwd = 0)
+
+plot(data_10AwayU1$TIME,data_10AwayU1$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "From Opp. 33  yardline, Up 1", lwd = 0)
+dev.off()
+
+```
+
+
+```{r}
+plot(data_29AwayM7$TIME,data_29AwayM7$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 3 yardline Down 7", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_25AwayM7$TIME,data_25AwayM7$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 17 yardline Down 7", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_20AwayM7$TIME,data_20AwayM7$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 33 yardline Down 7", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_15AwayM7$TIME,data_15AwayM7$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from 50 yardline Down 7", lwd = 1, type = 'l', ylim = 0:1)
+```
+
+```{r}
+jpeg("Down7TimeandWPDiffs.jpeg")
+par(mfrow = c(3,2))
+plot(data_29AwayM7$TIME,data_29AwayM7$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Own 3 yardline Down 7", lwd = 1, type = 'l')
+plot(data_25AwayM7$TIME,data_25AwayM7$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Own 17 yardline Down 7", lwd = 1, type = 'l')
+plot(data_20AwayM7$TIME,data_20AwayM7$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Own 33 yardline Down 7", lwd = 1, type = 'l')
+plot(data_15AwayM7$TIME,data_15AwayM7$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From 50 yardline Down 7", lwd = 1, type = 'l')
+plot(data_10AwayM7$TIME,data_10AwayM7$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Opp 33 yardline Down 7", lwd = 1, type = 'l')
+plot(data_05AwayM7$TIME,data_05AwayM7$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Opp 17 yardline Down 7", lwd = 1, type = 'l')
+dev.off()
+
+jpeg("Down10TimeandWPDiffs.jpeg")
+par(mfrow = c(3,2))
+plot(data_29AwayD10$TIME,data_29AwayD10$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Own 3 yardline Down 10", lwd = 1, type = 'l')
+plot(data_25AwayD10$TIME,data_25AwayD10$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Own 17 yardline Down 10", lwd = 1, type = 'l')
+plot(data_20AwayD10$TIME,data_20AwayD10$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Own 33 yardline Down 10", lwd = 1, type = 'l')
+plot(data_15AwayD10$TIME,data_15AwayD10$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From 50 yardline Down 10", lwd = 1, type = 'l')
+plot(data_10AwayD10$TIME,data_10AwayD10$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Opp 33 yardline Down 10", lwd = 1, type = 'l')
+plot(data_05AwayD10$TIME,data_05AwayD10$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Opp 17 yardline Down 10", lwd = 1, type = 'l')
+dev.off()
+
+jpeg("Down4TimeandWPDiffs.jpeg")
+par(mfrow = c(3,2))
+plot(data_29AwayD4$TIME,data_29AwayD4$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Own 3 yardline Down 4", lwd = 1, type = 'l')
+plot(data_25AwayD4$TIME,data_25AwayD4$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Own 17 yardline Down 4", lwd = 1, type = 'l')
+plot(data_20AwayD4$TIME,data_20AwayD4$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Own 33 yardline Down 4", lwd = 1, type = 'l')
+plot(data_15AwayD4$TIME,data_15AwayD4$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From 50 yardline Down 4", lwd = 1, type = 'l')
+plot(data_10AwayD4$TIME,data_10AwayD4$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Opp 33 yardline Down 4", lwd = 1, type = 'l')
+plot(data_05AwayD4$TIME,data_05AwayD4$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Opp 17 yardline Down 4", lwd = 1, type = 'l')
+dev.off()
+
+jpeg("Down1TimeandWPDiffs.jpeg")
+par(mfrow = c(3,2))
+plot(data_29AwayD1$TIME,data_29AwayD1$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Own 3 yardline Down 1", lwd = 1, type = 'l')
+plot(data_25AwayD1$TIME,data_25AwayD1$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Own 17 yardline Down 1", lwd = 1, type = 'l')
+plot(data_20AwayD1$TIME,data_20AwayD1$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Own 33 yardline Down 1", lwd = 1, type = 'l')
+plot(data_15AwayD1$TIME,data_15AwayD1$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From 50 yardline Down 1", lwd = 1, type = 'l')
+plot(data_10AwayD1$TIME,data_10AwayD1$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Opp 33 yardline Down 1", lwd = 1, type = 'l')
+plot(data_05AwayD1$TIME,data_05AwayD1$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Opp 17 yardline Down 1", lwd = 1, type = 'l')
+dev.off()
+
+
+jpeg("Up1TimeandWPDiffs.jpeg")
+par(mfrow = c(3,2))
+plot(data_29AwayU1$TIME,data_29AwayU1$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Own 3 yardline Up 1", lwd = 1, type = 'l')
+plot(data_25AwayU1$TIME,data_25AwayU1$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Own 17 yardline Up 1", lwd = 1, type = 'l')
+plot(data_20AwayU1$TIME,data_20AwayU1$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Own 33 yardline Up 1", lwd = 1, type = 'l')
+plot(data_15AwayU1$TIME,data_15AwayU1$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From 50 yardline Up 1", lwd = 1, type = 'l')
+plot(data_10AwayU1$TIME,data_10AwayU1$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Opp 33 yardline Up 1", lwd = 1, type = 'l')
+plot(data_05AwayU1$TIME,data_05AwayU1$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Opp 17 yardline Up 1", lwd = 1, type = 'l')
+dev.off()
+
+
+jpeg("Up4TimeandWPDiffs.jpeg")
+par(mfrow = c(3,2))
+plot(data_29AwayU4$TIME,data_29AwayU4$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Own 3 yardline Up 4", lwd = 1, type = 'l')
+plot(data_25AwayU4$TIME,data_25AwayU4$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Own 17 yardline Up 4", lwd = 1, type = 'l')
+plot(data_20AwayU4$TIME,data_20AwayU4$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Own 33 yardline Up 4", lwd = 1, type = 'l')
+plot(data_15AwayU4$TIME,data_15AwayU4$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From 50 yardline Up 4", lwd = 1, type = 'l')
+plot(data_10AwayU4$TIME,data_10AwayU4$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Opp 33 yardline Up 4", lwd = 1, type = 'l')
+plot(data_05AwayU4$TIME,data_05AwayU4$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Opp 17 yardline Up 4", lwd = 1, type = 'l')
+dev.off()
+
+jpeg("Up7TimeandWPDiffs.jpeg")
+par(mfrow = c(3,2))
+plot(data_29AwayU7$TIME,data_29AwayU7$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Own 3 yardline Up 7", lwd = 1, type = 'l')
+plot(data_25AwayU7$TIME,data_25AwayU7$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Own 17 yardline Up 7", lwd = 1, type = 'l')
+plot(data_20AwayU7$TIME,data_20AwayU7$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Own 33 yardline Up 7", lwd = 1, type = 'l')
+plot(data_15AwayU7$TIME,data_15AwayU7$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From 50 yardline Up 7", lwd = 1, type = 'l')
+plot(data_10AwayU7$TIME,data_10AwayU7$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Opp 33 yardline Up 7", lwd = 1, type = 'l')
+plot(data_05AwayU7$TIME,data_05AwayU7$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Opp 17 yardline Up 7", lwd = 1, type = 'l')
+dev.off()
+
+jpeg("Up10TimeandWPDiffs.jpeg")
+par(mfrow = c(3,2))
+plot(data_29AwayU10$TIME,data_29AwayU10$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Own 3 yardline Up 10", lwd = 1, type = 'l')
+plot(data_25AwayU10$TIME,data_25AwayU10$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Own 17 yardline Up 10", lwd = 1, type = 'l')
+plot(data_20AwayU10$TIME,data_20AwayU10$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Own 33 yardline Up 10", lwd = 1, type = 'l')
+plot(data_15AwayU10$TIME,data_15AwayU10$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From 50 yardline Up 10", lwd = 1, type = 'l')
+plot(data_10AwayU10$TIME,data_10AwayU10$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Opp 33 yardline Up 10", lwd = 1, type = 'l')
+plot(data_05AwayU10$TIME,data_05AwayU10$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Opp 17 yardline Up 10", lwd = 1, type = 'l')
+dev.off()
+
+jpeg("TieGameTimeandWPDiffs.jpeg")
+par(mfrow = c(3,2))
+plot(data_29Away$TIME,data_29Away$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Own 3 yardline Tie Game", lwd = 1, type = 'l')
+plot(data_25Away$TIME,data_25Away$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Own 17 yardline Tie Game", lwd = 1, type = 'l')
+plot(data_20Away$TIME,data_20Away$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Own 33 yardline Tie Game", lwd = 1, type = 'l')
+plot(data_15Away$TIME,data_15Away$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From 50 yardline Tie Game", lwd = 1, type = 'l')
+plot(data_10Away$TIME,data_10Away$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Opp 33 yardline Tie Game", lwd = 1, type = 'l')
+plot(data_05Away$TIME,data_05Away$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "From Opp 17 yardline Tie Game", lwd = 1, type = 'l')
+dev.off()
+
+jpeg("StratDecisionUp7.jpeg")
+par(mfrow = c(3,2))
+plot(data_20AwayU7$TIME,data_29AwayU7$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 3 yardline Up 7", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_25AwayU7$TIME,data_25AwayU7$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 17 yardline Up 7", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_20AwayU7$TIME,data_20AwayU7$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 33 yardline Up 7", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_15AwayU7$TIME,data_15AwayU7$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from 50 yardline Up 7", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_10AwayU7$TIME,data_10AwayU7$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Opp. 33 yardline Up 7", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_05AwayU7$TIME,data_05AwayU7$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Opp. 17 yardline Up 7", lwd = 1, type = 'l', ylim = 0:1)
+dev.off()
+
+jpeg("StratDecisionUp10.jpeg")
+par(mfrow = c(3,2))
+plot(data_20AwayU10$TIME,data_29AwayU10$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 3 yardline Up 10", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_25AwayU10$TIME,data_25AwayU10$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 17 yardline Up 10", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_20AwayU10$TIME,data_20AwayU10$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 33 yardline Up 10", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_15AwayU10$TIME,data_15AwayU10$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from 50 yardline Up 10", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_10AwayU10$TIME,data_10AwayU10$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Opp. 33 yardline Up 10", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_05AwayU10$TIME,data_05AwayU10$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Opp. 17 yardline Up 10", lwd = 1, type = 'l', ylim = 0:1)
+dev.off()
+
+
+jpeg("StratDecisionTie.jpeg")
+par(mfrow = c(3,2))
+plot(data_20Away$TIME,data_29Away$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 3 yardline in a Tie Game", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_25Away$TIME,data_25Away$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 17 yardline in a Tie Game", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_20Away$TIME,data_20Away$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 33 yardline in a Tie Game", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_15Away$TIME,data_15Away$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from 50 yardline in a Tie Game", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_10Away$TIME,data_10Away$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Opp. 33 yardline in a Tie Game", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_05Away$TIME,data_05Away$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Opp. 17 yardline in a Tie Game", lwd = 1, type = 'l', ylim = 0:1)
+dev.off()
+
+jpeg("StratDecisionUp1.jpeg")
+par(mfrow = c(3,2))
+plot(data_20AwayU1$TIME,data_29AwayU1$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 3 yardline Up 1", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_25AwayU1$TIME,data_25AwayU1$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 17 yardline Up 1", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_20AwayU1$TIME,data_20AwayU1$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 33 yardline Up 1", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_15AwayU1$TIME,data_15AwayU1$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from 50 yardline Up 1", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_10AwayU1$TIME,data_10AwayU1$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Opp. 33 yardline Up 1", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_05AwayU1$TIME,data_05AwayU1$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Opp. 17 yardline Up 1", lwd = 1, type = 'l', ylim = 0:1)
+dev.off()
+
+
+jpeg("StratDecisionUp4.jpeg")
+par(mfrow = c(3,2))
+plot(data_20AwayU4$TIME,data_29AwayU4$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 3 yardline Up 4", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_25AwayU4$TIME,data_25AwayU4$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 17 yardline Up 4", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_20AwayU4$TIME,data_20AwayU4$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 33 yardline Up 4", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_15AwayU4$TIME,data_15AwayU4$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from 50 yardline Up 4", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_10AwayU4$TIME,data_10AwayU4$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Opp. 33 yardline Up 4", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_05AwayU4$TIME,data_05AwayU4$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Opp. 17 yardline Up 4", lwd = 1, type = 'l', ylim = 0:1)
+dev.off()
+
+jpeg("StratDecisionDown1.jpeg")
+par(mfrow = c(3,2))
+plot(data_20AwayD1$TIME,data_29AwayD1$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 3 yardline Down 1", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_25AwayD1$TIME,data_25AwayD1$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 17 yardline Down 1", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_20AwayD1$TIME,data_20AwayD1$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 33 yardline Down 1", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_15AwayD1$TIME,data_15AwayD1$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from 50 yardline Down 1", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_10AwayD1$TIME,data_10AwayD1$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Opp. 33 yardline Down 1", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_05AwayD1$TIME,data_05AwayD1$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Opp. 17 yardline Down 1", lwd = 1, type = 'l', ylim = 0:1)
+dev.off()
+
+
+jpeg("StratDecisionDown4.jpeg")
+par(mfrow = c(3,2))
+plot(data_20AwayD4$TIME,data_29AwayD4$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 3 yardline Down 4", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_25AwayD4$TIME,data_25AwayD4$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 17 yardline Down 4", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_20AwayD4$TIME,data_20AwayD4$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 33 yardline Down 4", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_15AwayD4$TIME,data_15AwayD4$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from 50 yardline Down 4", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_10AwayD4$TIME,data_10AwayD4$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Opp. 33 yardline Down 4", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_05AwayD4$TIME,data_05AwayD4$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Opp. 17 yardline Down 4", lwd = 1, type = 'l', ylim = 0:1)
+dev.off()
+
+
+jpeg("StratDecisionDown7.jpeg")
+par(mfrow = c(3,2))
+plot(data_20AwayM7$TIME,data_29AwayM7$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 3 yardline Down 7", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_25AwayM7$TIME,data_25AwayM7$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 17 yardline Down 7", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_20AwayM7$TIME,data_20AwayM7$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 33 yardline Down 7", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_15AwayM7$TIME,data_15AwayM7$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from 50 yardline Down 7", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_10AwayM7$TIME,data_10AwayM7$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Opp. 33 yardline Down 7", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_05AwayM7$TIME,data_05AwayM7$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Opp. 17 yardline Down 7", lwd = 1, type = 'l', ylim = 0:1)
+dev.off()
+
+
+
+jpeg("StratDecisionDown10.jpeg")
+par(mfrow = c(3,2))
+plot(data_20AwayD10$TIME,data_29AwayD10$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 3 yardline Down 10", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_25AwayD10$TIME,data_25AwayD10$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 17 yardline Down 10", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_20AwayD10$TIME,data_20AwayD10$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 33 yardline Down 10", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_15AwayD10$TIME,data_15AwayD10$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from 50 yardline Down 10", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_10AwayD10$TIME,data_10AwayD10$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Opp. 33 yardline Down 10", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_05AwayD10$TIME,data_05AwayD10$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Opp. 17 yardline Down 10", lwd = 1, type = 'l', ylim = 0:1)
+dev.off()
+
+```
+
+
+```{r}
+
+
+plot(data_29AwayU7$TIME,data_29AwayU7$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from Own 03 yardline Up 7", lwd = 0)
+
+plot(data_25AwayU7$TIME,data_25AwayU7$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from Own 17 yardline Up 7", lwd = 0)
+
+plot(data_20AwayU7$TIME,data_20AwayU7$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from Own 34 yardline Up 7", lwd = 0)
+
+plot(data_15AwayU7$TIME,data_15AwayU7$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from 50 yardline Up 7", lwd = 0)
+
+plot(data_10AwayU7$TIME,data_10AwayU7$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from Opp. 33  yardline Up 7", lwd = 0)
+
+plot(data_05AwayU7$TIME,data_05AwayU7$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from Opp. 17 yardline Up 7", lwd = 0)
+
+plot(data_29AwayU7$TIME,data_29AwayU7$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 3 yardline Up 7", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_25AwayU7$TIME,data_25AwayU7$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 17 yardline Up 7", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_20AwayU7$TIME,data_20AwayU7$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 33 yardline Up 7", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_15AwayU7$TIME,data_15AwayU7$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from 50 yardline Up 7", lwd = 1, type = 'l', ylim = 0:1)
+
+plot(data_29AwayU7$TIME,data_29AwayU7$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from Own 3 yardline Up 7", lwd = 1, type = 'l')
+plot(data_25AwayU7$TIME,data_25AwayU7$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from Own 17 yardline Up 7", lwd = 1, type = 'l')
+plot(data_20AwayU7$TIME,data_20AwayU7$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from Own 33 yardline Up 7", lwd = 1, type = 'l')
+plot(data_15AwayU7$TIME,data_15AwayU7$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from 50 yardline Up 7", lwd = 1, type = 'l')
+plot(data_10AwayU7$TIME,data_10AwayU7$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from Opp 33 yardline Up 7", lwd = 1, type = 'l')
+plot(data_05AwayU7$TIME,data_05AwayU7$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from Opp 17 yardline Up 7", lwd = 1, type = 'l')
+
+```
+
+```{r}
+
+
+plot(data_29AwayU4$TIME,data_29AwayU4$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from Own 03 yardline Up 4", lwd = 0)
+
+plot(data_25AwayU4$TIME,data_25AwayU4$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from Own 14 yardline Up 4", lwd = 0)
+
+plot(data_20AwayU4$TIME,data_20AwayU4$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from Own 34 yardline Up 4", lwd = 0)
+
+plot(data_15AwayU4$TIME,data_15AwayU4$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from 50 yardline Up 4", lwd = 0)
+
+plot(data_10AwayU4$TIME,data_10AwayU4$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from Opp. 33  yardline Up 4", lwd = 0)
+
+plot(data_05AwayU4$TIME,data_05AwayU4$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from Opp. 14 yardline Up 4", lwd = 0)
+
+plot(data_29AwayU4$TIME,data_29AwayU4$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 3 yardline Up 4", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_25AwayU4$TIME,data_25AwayU4$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 17 yardline Up 4", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_20AwayU4$TIME,data_20AwayU4$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 33 yardline Up 4", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_15AwayU4$TIME,data_15AwayU4$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from 50 yardline Up 4", lwd = 1, type = 'l', ylim = 0:1)
+
+plot(data_29AwayU4$TIME,data_29AwayU4$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from Own 3 yardline Up 4", lwd = 1, type = 'l')
+plot(data_25AwayU4$TIME,data_25AwayU4$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from Own 17 yardline Up 4", lwd = 1, type = 'l')
+plot(data_20AwayU4$TIME,data_20AwayU4$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from Own 33 yardline Up 4", lwd = 1, type = 'l')
+plot(data_15AwayU4$TIME,data_15AwayU4$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from 50 yardline Up 4", lwd = 1, type = 'l')
+plot(data_10AwayU4$TIME,data_10AwayU4$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from Opp 33 yardline Up 4", lwd = 1, type = 'l')
+plot(data_05AwayU4$TIME,data_05AwayU4$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from Opp 17 yardline Up 4", lwd = 1, type = 'l')
+
+
+```
+
+```{r}
+
+
+plot(data_29AwayD4$TIME,data_29AwayD4$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from Own 03 yardline Down 4", lwd = 0)
+
+plot(data_25AwayD4$TIME,data_25AwayD4$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from Own 14 yardline Down 4", lwd = 0)
+
+plot(data_20AwayD4$TIME,data_20AwayD4$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from Own 34 yardline Down 4", lwd = 0)
+
+plot(data_15AwayD4$TIME,data_15AwayD4$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from 50 yardline Down 4", lwd = 0)
+
+plot(data_10AwayD4$TIME,data_10AwayD4$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from Opp. 33  yardline Down 4", lwd = 0)
+
+plot(data_05AwayD4$TIME,data_05AwayD4$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from Opp. 14 yardline Down 4", lwd = 0)
+
+plot(data_29AwayD4$TIME,data_29AwayD4$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 3 yardline Down 4", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_25AwayD4$TIME,data_25AwayD4$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 17 yardline Down 4", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_20AwayD4$TIME,data_20AwayD4$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 33 yardline Down 4", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_15AwayD4$TIME,data_15AwayD4$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from 50 yardline Down 4", lwd = 1, type = 'l', ylim = 0:1)
+
+plot(data_29AwayD4$TIME,data_29AwayD4$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from Own 3 yardline Down 4", lwd = 1, type = 'l')
+plot(data_25AwayD4$TIME,data_25AwayD4$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from Own 17 yardline Down 4", lwd = 1, type = 'l')
+plot(data_20AwayD4$TIME,data_20AwayD4$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from Own 33 yardline Down 4", lwd = 1, type = 'l')
+plot(data_15AwayD4$TIME,data_15AwayD4$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from 50 yardline Down 4", lwd = 1, type = 'l')
+plot(data_10AwayD4$TIME,data_10AwayD4$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from Opp 33 yardline Down 4", lwd = 1, type = 'l')
+plot(data_05AwayD4$TIME,data_05AwayD4$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from Opp 17 yardline Down 4", lwd = 1, type = 'l')
+
+```
+
+```{r}
+
+
+plot(data_29AwayD10$TIME,data_29AwayD10$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from Own 03 yardline Down 10", lwd = 0)
+
+plot(data_25AwayD10$TIME,data_25AwayD10$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from Own 14 yardline Down 10", lwd = 0)
+
+plot(data_20AwayD10$TIME,data_20AwayD10$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from Own 34 yardline Down 10", lwd = 0)
+
+plot(data_15AwayD10$TIME,data_15AwayD10$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from 50 yardline Down 10", lwd = 0)
+
+plot(data_10AwayD10$TIME,data_10AwayD10$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from Opp. 33  yardline Down 10", lwd = 0)
+
+plot(data_05AwayD10$TIME,data_05AwayD10$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from Opp. 14 yardline Down 10", lwd = 0)
+
+plot(data_29AwayD10$TIME,data_29AwayD10$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 3 yardline Down 10", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_25AwayD10$TIME,data_25AwayD10$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 17 yardline Down 10", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_20AwayD10$TIME,data_20AwayD10$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 33 yardline Down 10", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_15AwayD10$TIME,data_15AwayD10$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from 50 yardline Down 10", lwd = 1, type = 'l', ylim = 0:1)
+
+plot(data_29AwayD10$TIME,data_29AwayD10$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from Own 3 yardline Down 10", lwd = 1, type = 'l')
+plot(data_25AwayD10$TIME,data_25AwayD10$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from Own 17 yardline Down 10", lwd = 1, type = 'l')
+plot(data_20AwayD10$TIME,data_20AwayD10$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from Own 33 yardline Down 10", lwd = 1, type = 'l')
+plot(data_15AwayD10$TIME,data_15AwayD10$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from 50 yardline Down 10", lwd = 1, type = 'l')
+plot(data_10AwayD10$TIME,data_10AwayD10$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from Opp 33 yardline Down 10", lwd = 1, type = 'l')
+plot(data_05AwayD10$TIME,data_05AwayD10$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from Opp 17 yardline Down 10", lwd = 1, type = 'l')
+```
+
+```{r}
+
+
+plot(data_29AwayU10$TIME,data_29AwayU10$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from Own 03 yardline Up 10", lwd = 0)
+
+plot(data_25AwayU10$TIME,data_25AwayU10$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from Own 14 yardline Up 10", lwd = 0)
+
+plot(data_20AwayU10$TIME,data_20AwayU10$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from Own 34 yardline Up 10", lwd = 0)
+
+plot(data_15AwayU10$TIME,data_15AwayU10$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from 50 yardline Up 10", lwd = 0)
+
+plot(data_10AwayU10$TIME,data_10AwayU10$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from Opp. 33  yardline Up 10", lwd = 0)
+
+plot(data_05AwayU10$TIME,data_05AwayU10$Winprob, main = "Win Probability versus Time", xlab = "Time (ticks)", ylab = "Win Probability", type = 'l', sub = "For 1st Down and 10 from Opp. 14 yardline Up 10", lwd = 0)
+
+plot(data_29AwayU10$TIME,data_29AwayU10$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 3 yardline Up 10", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_25AwayU10$TIME,data_25AwayU10$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 17 yardline Up 10", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_20AwayU10$TIME,data_20AwayU10$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from Own 33 yardline Up 10", lwd = 1, type = 'l', ylim = 0:1)
+plot(data_15AwayU10$TIME,data_15AwayU10$`2MIN.SUM`, main = "Strategy Decision as Affected by Time", xlab = "Time (ticks)", ylab = "Optimal 2 MIN Strategy Usage Rate", sub = "For 1st Down and 10 from 50 yardline Up 10", lwd = 1, type = 'l', ylim = 0:1)
+
+plot(data_29AwayU10$TIME,data_29AwayU10$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from Own 3 yardline Up 10", lwd = 1, type = 'l')
+plot(data_25AwayU10$TIME,data_25AwayU10$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from Own 17 yardline Up 10", lwd = 1, type = 'l')
+plot(data_20AwayU10$TIME,data_20AwayU10$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from Own 33 yardline Up 10", lwd = 1, type = 'l')
+plot(data_15AwayU10$TIME,data_15AwayU10$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from 50 yardline Up 10", lwd = 1, type = 'l')
+plot(data_10AwayU10$TIME,data_10AwayU10$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from Opp 33 yardline Up 10", lwd = 1, type = 'l')
+plot(data_05AwayU10$TIME,data_05AwayU10$DELTA, main = "Win Probability Differences", xlab = "Time (ticks)", ylab = "Difference (%)", sub = "For 1st Down and 10 from Opp 17 yardline Up 10", lwd = 1, type = 'l')
+```
+

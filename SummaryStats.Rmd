@@ -1,0 +1,205 @@
+---
+title: "FittingPlayTypes"
+author: "Logan Robert McGuire"
+date: "February 18, 2021"
+output: html_document
+---
+
+```{r}
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(stats4)
+library(vcd)
+library(fitdistrplus)
+library(binom)
+
+#seasons <- 2010:2020
+#pbp <- purrr::map_df(seasons, function(x) {
+#  readr::read_csv(
+#    glue::glue("https://raw.githubusercontent.com/guga31bb/nflfastR-data/master/data/play_by_play_{x}.csv.gz"))
+#
+#})
+```
+
+```{r}
+pbp_runs <- pbp %>%
+  filter(play_type == 'run')
+pbp_pass <- pbp %>%
+  filter(play_type == 'pass')
+
+```
+
+```{r}
+pbp_RunInside <- pbp_runs %>%
+  filter(run_gap == 'guard' | run_gap == 'tackle')
+pbp_RunOutside <- pbp_runs %>%
+  filter(run_gap == 'end')
+pbp_PassShort <- pbp_pass %>%
+  filter(pass_length == 'short' & complete_pass == 1)
+pbp_PassDeep <- pbp_pass %>%
+  filter(pass_length == 'deep' & complete_pass == 1)
+
+hist(pbp_RunInside$yards_gained, xlab="Yards", 
+     main = "Yardage Gained on Inside Run Plays", breaks = 100, freq = FALSE, xlim = c(0,100))
+hist(pbp_RunOutside$yards_gained, xlab="Yards", 
+     main = "Yardage Gained on Outside Run Plays", breaks = 100, freq = FALSE, xlim = c(0,100))
+hist(pbp_PassShort$yards_gained, xlab="Yards", 
+     main = "Yardage Gained on Short Pass Plays", breaks = 100, freq = FALSE, xlim = c(0,100))
+hist(pbp_PassDeep$yards_gained, xlab="Yards", 
+     main = "Yardage Gained on Deep Pass Plays", breaks = 100, freq = FALSE, xlim = c(0,100))
+
+```
+
+```{r}
+#fitting distribution and printing statistics
+
+#Run Inside
+fitdistrplus::fitdist(pbp_RunInside$yards_gained, "logis")
+
+#Run Outside
+fitdistrplus::fitdist(pbp_RunOutside$yards_gained, "logis")
+
+#Pass Short
+fitdistrplus::fitdist(pbp_PassShort$yards_gained, "logis")
+
+#Pass Deep
+fitdistrplus::fitdist(pbp_PassDeep$yards_gained, "logis")
+
+```
+
+
+
+```{r}
+pbp_PassShortIncom <- pbp_pass %>%
+  filter(pass_length == 'short' & complete_pass == 0)
+
+ShortCompletionCount = nrow(pbp_PassShort)
+ShortIncompletionCount = nrow(pbp_PassShortIncom)
+total_short_count= ShortIncompletionCount + ShortCompletionCount
+binom.confint(ShortCompletionCount, total_short_count)
+
+```
+
+```{r}
+pbp_PassDeepIncom <- pbp_pass %>%
+  filter(pass_length == 'deep' & complete_pass == 0)
+
+DeepCompletionCount = nrow(pbp_PassDeep)
+DeepIncompletionCount = nrow(pbp_PassDeepIncom)
+total_deep_count= DeepIncompletionCount + DeepCompletionCount
+binom.confint(DeepCompletionCount, total_deep_count)
+```
+```{r}
+pbp_PassDeepInterception <- pbp_pass %>%
+  filter(pass_length == 'deep' & interception == 1)
+pbp_PassDeepFumble <- pbp_pass %>%
+  filter(pass_length == 'deep' & fumble_lost == 1)
+
+DeepIntCount = nrow(pbp_PassDeepInterception)
+DeepFumbleCount = nrow(pbp_PassDeepFumble)
+total_deep_turnover = DeepIntCount + DeepFumbleCount
+binom.confint(total_deep_turnover,DeepCompletionCount)
+```
+
+```{r}
+pbp_PassShortInterception <- pbp_pass %>%
+  filter(pass_length == 'short' & interception == 1)
+pbp_PassShortFumble <- pbp_pass %>%
+  filter(pass_length == 'short' & fumble_lost == 1)
+
+ShortIntCount = nrow(pbp_PassShortInterception)
+ShortFumbleCount = nrow(pbp_PassShortFumble)
+total_short_turnover = ShortIntCount + ShortFumbleCount
+binom.confint(total_short_turnover,ShortCompletionCount)
+```
+```{r}
+pbp_RunInsideFumble <- pbp_RunInside %>%
+  filter(fumble_lost == 1)
+
+RunInsideCount = nrow(pbp_RunInside)
+RunInsideFumbleCount = nrow(pbp_RunInsideFumble)
+binom.confint(RunInsideFumbleCount,RunInsideCount)
+```
+```{r}
+pbp_RunOutsideFumble <- pbp_RunOutside %>%
+  filter(fumble_lost == 1)
+
+RunOutsideCount = nrow(pbp_RunOutside)
+RunOutsideFumbleCount = nrow(pbp_RunOutsideFumble)
+binom.confint(RunOutsideFumbleCount,RunOutsideCount)
+```
+
+```{r}
+hist(TimeForRunInside, xlab="Seconds Per Play", 
+     main = "Time Per Play for Inside Runs", breaks = 50, freq = FALSE, xlim = c(0,60))
+
+hist(TimeForRunOutside, xlab="Seconds Per Play", 
+     main = "Time Per Play for Outside Runs", breaks = 50, freq = FALSE, xlim = c(0,60))
+
+hist(TimeForPassShort, xlab="Seconds Per Play", 
+     main = "Time Per Play for Short Completions", breaks = 50, freq = FALSE, xlim = c(0,60))
+
+hist(TimeForPassDeep, xlab="Seconds Per Play", 
+     main = "Time Per Play for Deep Completions", breaks = 50, freq = FALSE, xlim = c(0,60))
+
+hist(TimeForIncPassShort, xlab="Seconds Per Play", 
+     main = "Time Per Play for Short Incompletions", breaks = 50, freq = FALSE, xlim = c(0,60))
+
+hist(TimeForIncPassDeep, xlab="Seconds Per Play", 
+     main = "Time Per Play for Deep Incompletions", breaks = 50, freq = FALSE, xlim = c(0,60))
+```
+
+```{r}
+RoundedTimeForRunInside <- pbp_RunInsideRounded$diff
+prop.table(table(RoundedTimeForRunInside))
+RoundedTimeForRunOutside <-pbp_RunOutsideRounded$diff
+prop.table(table(RoundedTimeForRunOutside))
+RoundedTimeForPassShort <- pbp_PassShortRounded$diff
+prop.table(table(RoundedTimeForPassShort))
+RoundedTimeForPassDeep <- pbp_PassDeepRounded$diff
+prop.table(table(RoundedTimeForPassDeep))
+```
+
+
+```{r}
+#grabs time per play for all plays of given play type
+TimeFor2MCGRunInside <- RunInside_2MCG$diff
+TimeFor2MCGRunOutside <-RunOutside_2MCG$diff
+TimeFor2MCGPassShort <- ComplShort_2MCG$diff
+TimeFor2MCGPassDeep <- ComplDeep_2MCG$diff
+TimeFor2MCGIncPassShort <- IncomplShort_2MCG$diff
+TimeFor2MCGIncPassDeep <- IncomplDeep_2MCG$diff
+
+hist(RoundedTimeForRunInside, xlab="Seconds Per Play", 
+     main = "Rounded Time Per Play for Inside Runs", breaks = 50, freq = FALSE, xlim = c(0,60))
+
+hist(RoundedTimeForRunOutside, xlab="Seconds Per Play", 
+     main = "Rounded Time Per Play for Outside Runs", breaks = 50, freq = FALSE, xlim = c(0,60))
+
+hist(RoundedTimeForPassShort, xlab="Seconds Per Play", 
+     main = "Rounded Time Per Play for Short Completions", breaks = 50, freq = FALSE, xlim = c(0,60))
+
+hist(RoundedTimeForPassDeep, xlab="Seconds Per Play", 
+     main = "Rounded Time Per Play for Deep Completions", breaks = 50, freq = FALSE, xlim = c(0,60))
+```
+
+
+```{r}
+RoundedTimeForIncPassShort <- pbp_IncPassShortRounded$diff
+prop.table(table(RoundedTimeForIncPassShort))
+RoundedTimeForIncPassDeep <- pbp_IncPassDeepRounded$diff
+prop.table(table(RoundedTimeForIncPassDeep))
+
+hist(RoundedTimeForIncPassShort, xlab="Seconds Per Play", 
+     main = "Rounded Time Per Play for Short Incompletions", breaks = 50, freq = FALSE, xlim = c(0,60))
+
+hist(RoundedTimeForIncPassDeep, xlab="Seconds Per Play", 
+     main = "Rounded Time Per Play for Deep Incompletions", breaks = 50, freq = FALSE, xlim = c(0,60))
+
+```
+
+
+
+
+

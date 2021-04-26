@@ -1,0 +1,296 @@
+---
+title: "SampleOfHonorsProjectForHelp"
+author: "Logan Robert McGuire"
+date: "January 20, 2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r, message=FALSE,warning=FALSE}
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(stats4)
+library(vcd)
+seasons <- 2010:2020
+#pbp <- purrr::map_df(seasons, function(x) {
+#  readr::read_csv(
+#    glue::glue("https://raw.githubusercontent.com/guga31bb/nflfastR-data/master/data/play_by_play_{x}.csv.gz")
+#  )
+#})
+#pbp stands for PLAY BY PLAY
+
+#seperates master data set into run vs. pass
+#pbp_runs <- pbp %>%
+#  filter(play_type == 'run')
+#pbp_pass <- pbp %>%
+#  filter(play_type == 'pass')
+#pbp_completion  <- pbp %>%
+#  filter(play_type == 'pass' & complete_pass == 1)
+
+
+
+#grabs yards gained for all plays of given play type
+RunYardsPerPlay <- pbp_runs$yards_gained
+PassYardsPerPlay <- pbp_pass$yards_gained
+YardsPerCompletion <- pbp_completion$yards_gained
+
+runpercentage = 100*nrow(pbp_runs) / (nrow(pbp_runs) + nrow(pbp_pass))
+print("In 2001, the run selection probability was:")
+print(runpercentage)
+min(RunYardsPerPlay)
+
+#graph run yards per play, and associated density function
+hist(RunYardsPerPlay, xlab="Yards Gained on Individual Run Plays", 
+     main = "Histogram of Yardage Gained on Run Plays", breaks = 100, freq = FALSE, xlim = c(0,100))
+lines(density(RunYardsPerPlay), col = 'red')
+
+#graphs pass yards per play and associated density functions
+hist(PassYardsPerPlay, xlab="Yards Gained on Individual Pass Plays",
+     main = "Histogram of Yardage Gained on Pass Plays", breaks = 100, freq = FALSE, xlim = c(0,100))
+lines(density(PassYardsPerPlay), col = 'red')
+
+#graphs pass yards per play ON COMPLETIONS and associated density functions
+hist(YardsPerCompletion, xlab="Yards Gained on Individual Pass Completion Plays",
+     main = "Histogram of Yardage Gained on Pass Plays", breaks = 100, freq = FALSE, xlim = c(0,100))
+lines(density(CompletionYardsPerPlay), col = 'red')
+```
+
+
+```{r}
+RunYardsPerPlay.Shifted <- pbp_runs$yards_gained - min(pbp_runs$yards_gained) + 1
+RunInsideYardsPerPlay.Shifted = pbp_RunInside$yards_gained - min(pbp_RunInside$yards_gained) + 1
+
+PassYardsPerPlay.Shifted <- pbp_pass$yards_gained - min(pbp_pass$yards_gained) + 1
+YardsPerCompletion.Shifted <- pbp_completion$yards_gained -  min(pbp_completion$yards_gained) + 1
+
+#graph run yards per play, and associated density function
+hist(RunYardsPerPlay.Shifted, xlab="Yards Gained on Individual Run Plays", 
+     main = "Histogram of Yardage Gained on Run Plays", breaks = 100, freq = FALSE, xlim = c(0,100))
+lines(density(RunYardsPerPlay.Shifted), col = 'green')
+
+#graphs pass yards per play and associated density functions
+hist(PassYardsPerPlay.Shifted, xlab="Yards Gained on Individual Pass Plays",
+     main = "Histogram of Yardage Gained on Pass Plays", breaks = 100, freq = FALSE, xlim = c(0,100))
+lines(density(PassYardsPerPlay.Shifted), col = 'green')
+
+#graphs pass yards per play ON COMPLETIONS and associated density functions
+hist(YardsPerCompletion.Shifted, xlab="Yards Gained on Individual Pass Completion Plays",
+     main = "Histogram of Yardage Gained on Pass Plays", breaks = 100, freq = FALSE, xlim = c(0,100))
+lines(density(YardsPerCompletion.Shifted), col = 'green')
+
+```
+
+
+# Some Ideas To Explore! We could meet to talk about it!!!
+
+**Important Note:** Looking at the distribution you displayed above, it looks like your variable of interest has negative values. My guess is that it will not be a good idea to fit this variable with eith Weilbull, lognormal, poisson, exponential distribution as they all deal with only positive values. Unless tranformation is possible then you can look at those distributions.
+
+-w **First you should try  to gain some ideas about possible candidate distributions using the Cullen and Frey graph**.
+
+```{r, message=FALSE,warning=FALSE}
+library(fitdistrplus)
+library(logspline)
+
+#CULLEN FREY GRAPH FOR EACH NON SHIFTED DISTRIBUTION
+descdist(abs(PassYardsPerPlay), discrete = FALSE,boot = 1001)
+descdist(abs(RunYardsPerPlay), discrete = FALSE,boot = 1001)
+descdist(abs(YardsPerCompletion), discrete = FALSE,boot = 1001)
+
+#CULLEN FREY GRAPH FOR EACH SHIFTED DISTRIBUTION
+descdist(abs(PassYardsPerPlay.Shifted), discrete = TRUE,boot = 1001)
+descdist(abs(RunYardsPerPlay.Shifted), discrete = TRUE,boot = 1001)
+descdist(abs(YardsPerCompletion.Shifted), discrete = TRUE,boot = 1001)
+
+```
+
+**Comments:** The kurtosis and squared skewness of your sample is plottet as a blue point named "Observation". Looking at the results on this, with a positive skewness and a kurtosis not far from 12, it seems that possible distributions include the normal, logistics and possibly the uniform distribution
+
+**Good to know:** Skewness and kurtosis are known not to be robust. In order to take into account the uncertainty of the estimated values of kurtosis and skewness from data, a nonparametric bootstrap procedure can be performed by using the argument boot.
+
+
+### Let's fit some possible distributions with the data as it is and as it it suggested by the Cullen and Frey graph above:
+
+```{r}
+
+#for nonshifted distribution pass
+fn <- fitdist(PassYardsPerPlay, "norm")
+fu <- fitdist(PassYardsPerPlay, "unif")
+fl <- fitdist(PassYardsPerPlay, "logis")
+
+par(mfrow = c(2, 2))
+plotPass.legend <- c("normal", "unif", "logis")
+denscomp(list(fn, fu, fl), legendtext = plotPass.legend)
+qqcomp(list(fn, fu, fl), legendtext = plotPass.legend)
+cdfcomp(list(fn, fu, fl), legendtext = plotPass.legend)
+ppcomp(list(fn, fu, fl), legendtext = plotPass.legend)
+
+#for shifted distribution pass
+fn.S <- fitdist(PassYardsPerPlay.Shifted, "norm")
+fu.S <- fitdist(PassYardsPerPlay.Shifted, "unif")
+fl.S <- fitdist(PassYardsPerPlay.Shifted, "logis")
+fp.S <- fitdist(PassYardsPerPlay.Shifted, "pois")
+fw.S <- fitdist(PassYardsPerPlay.Shifted, "weibull")
+
+par(mfrow = c(3, 2))
+plotPassS.legend <- c("normal", "unif", "logis", "pois", "weibull")
+denscomp(list(fn.S, fu.S, fl.S, fp.S, fw.S), legendtext = plotPassS.legend)
+qqcomp(list(fn.S, fu.S, fl.S, fp.S, fw.S), legendtext = plotPassS.legend)
+cdfcomp(list(fn.S, fu.S, fl.S, fp.S, fw.S), legendtext = plotPassS.legend)
+ppcomp(list(fn.S, fu.S, fl.S, fp.S, fw.S), legendtext = plotPassS.legend)
+denscomp(list(fl.S, fp.S, fw.S), legendtext = c("Logistic","Poisson", "Weibull"))
+
+```
+**Comment:** Normal, logistic both look reasonable for unshifted AND shifted pass plays. Poisson and weibull also look reasonable for shifted distributions.
+
+```{r}
+#for nonshifted distribution runs
+fnRun <- fitdist(RunYardsPerPlay, "norm")
+fuRun <- fitdist(RunYardsPerPlay, "unif")
+flRun <- fitdist(RunYardsPerPlay, "logis"
+                 )
+par(mfrow = c(2, 2))
+plotRun.legend <- c("normal", "unif", "logis")
+denscomp(list(fnRun, fuRun, flRun), legendtext = plotRun.legend)
+qqcomp(list(fnRun, fuRun, flRun), legendtext = plotRun.legend)
+cdfcomp(list(fnRun, fuRun, flRun), legendtext = plotRun.legend)
+ppcomp(list(fnRun, fuRun, flRun), legendtext = plotRun.legend)
+
+
+#for shifted distribution run
+fnRun.S <- fitdist(RunYardsPerPlay.Shifted, "norm")
+fuRun.S <- fitdist(RunYardsPerPlay.Shifted, "unif")
+flRun.S <- fitdist(RunYardsPerPlay.Shifted, "logis")
+fpRun.S <- fitdist(RunYardsPerPlay.Shifted, "pois")
+fwRun.S <- fitdist(RunYardsPerPlay.Shifted, "weibull")
+
+par(mfrow = c(3, 2))
+plotRunS.legend <- c("normal", "unif", "logis", "pois", "weibull")
+denscomp(list(fnRun.S, fuRun.S, flRun.S, fpRun.S, fwRun.S), legendtext = plotRunS.legend)
+qqcomp(list(fnRun.S, fuRun.S, flRun.S, fpRun.S, fwRun.S), legendtext = plotRunS.legend)
+cdfcomp(list(fnRun.S, fuRun.S, flRun.S, fpRun.S, fwRun.S), legendtext = plotRunS.legend)
+ppcomp(list(fnRun.S, fuRun.S, flRun.S, fpRun.S, fwRun.S), legendtext = plotRunS.legend)
+
+```
+**Comment:** Normal, logistic both look reasonable for unshifted AND shifted run plays. Poisson and weibull also look reasonable for shifted distributions.
+
+```{r}
+#for nonshifted distribution pass COMPLETIONS
+fnCompl <- fitdist(YardsPerCompletion, "norm")
+fuCompl <- fitdist(YardsPerCompletion, "unif")
+flCompl <- fitdist(YardsPerCompletion, "logis")
+
+par(mfrow = c(2, 2))
+plotCompl.legend <- c("normal", "unif", "logis")
+denscomp(list(fn, fu, fl), legendtext = plotCompl.legend)
+qqcomp(list(fn, fu, fl), legendtext = plotCompl.legend)
+cdfcomp(list(fn, fu, fl), legendtext = plotCompl.legend)
+ppcomp(list(fn, fu, fl), legendtext = plotCompl.legend)
+
+#for shifted distribution pass COMPLETIONS
+fnCompl.S <- fitdist(YardsPerCompletion.Shifted, "norm")
+fuCompl.S <- fitdist(YardsPerCompletion.Shifted, "unif")
+flCompl.S <- fitdist(YardsPerCompletion.Shifted, "logis")
+fpCompl.S <- fitdist(YardsPerCompletion.Shifted, "pois")
+fwCompl.S <- fitdist(YardsPerCompletion.Shifted, "weibull")
+
+par(mfrow = c(3, 2))
+plotComplS.legend <- c("normal", "unif", "logis", "poisson", "weibull")
+denscomp(list(fnCompl.S, fuCompl.S, flCompl.S, fpCompl.S, fwCompl.S), legendtext = plotComplS.legend)
+qqcomp(list(fnCompl.S, fuCompl.S, flCompl.S, fpCompl.S, fwCompl.S), legendtext = plotComplS.legend)
+cdfcomp(list(fnCompl.S, fuCompl.S, flCompl.S, fpCompl.S, fwCompl.S), legendtext = plotComplS.legend)
+ppcomp(list(fnCompl.S, fuCompl.S, flCompl.S, fpCompl.S, fwCompl.S), legendtext = plotComplS.legend)
+
+```
+
+
+
+**Comments:** From the plotted fitting metrics above, it appears that normal and logistic are the best contenders, but it seems a little unclear who is the clear winner form the density plot. Let's take a closer look with a larger density plot for these two distributions.
+
+
+```{r}
+#Pass Density Graphs
+denscomp(list(fn, fl), legendtext = c("Normal", "Logistic"))
+denscomp(list(fl.S, fp.S, fw.S), legendtext = c("Logistic","Poisson", "Weibull"))
+
+```
+
+**Comments:** For this data, the logistic distribution fits the passing (non-shifted) data well. We will likely use the completion data, though.
+
+
+
+```{r}
+#Run Density Graphs
+denscomp(list(fnRun, flRun), legendtext = c("Normal", "Logistic"))
+denscomp(list(flRun.S, fpRun.S, fwRun.S), legendtext = c("Logistic","Poisson", "Weibull"))
+```
+**Comments:** It seems the normal distribution fits the Run data best. The poisson distribution may also be good.
+
+
+```{r}
+#Completion Density Graphs
+denscomp(list(fnCompl, flCompl), legendtext = c("Normal", "Logistic"))
+denscomp(list(flCompl.S, fpCompl.S, fwCompl.S), legendtext = c("Logistic","Poisson", "Weibull"))
+```
+
+**Comments:** It seems poisson distribution fits the Pass Completion (shifted) data best. The logistic distribution may also be good, especially for UNSHIFTED data.
+
+
+```{r}
+#Assessing goodness of fit for:
+
+#Pass (Non shifted):
+print("Pass (Non-Shifted)")
+gofstat(list(fn, fl))
+
+#Run (Non shifted):
+print("Run (Non-Shifted)")
+gofstat(list(fnRun, flRun))
+
+#Pass Completions (Non shifted):
+print("Pass Completions (Non-Shifted)")
+gofstat(list(fnCompl, flCompl))
+
+#Pass (Shifted):
+print("Pass (Shifted)")
+gofstat(list(fp.S, fw.S))
+
+#Run (Shifted):
+print("Run (Shifted)")
+gofstat(list(fpRun.S, fwRun.S))
+
+#Pass Completions (Shifted):
+print("Pass Completions (Shifted)")
+gofstat(list(fpCompl.S, fwCompl.S))
+
+```
+
+
+**Comments:**  Since the logistic distribution has the min AIC, BIC, and minimum goodness-of-fit statistics, we will choose the logistics distribution.
+
+
+
+### Deciding whether the maximum likelihood estimate (MLE) or a method of moment estimate(MME) will be appropriate to estimate the distribution parameters!
+
+
+
+```{r}
+fdanish.ln.MLE <- fitdist(PassYardsPerPlay, "logis")
+fdanish.ln.MME <- fitdist(PassYardsPerPlay, "logis", method = "mme",  order = 1:2)
+cdfcomp(list(fdanish.ln.MLE, fdanish.ln.MME),
+ legend = c("Logitics MLE", "Logistics MME"),
+main = "Fitting a Logistics distribution for Pass Plays",
+  xlogscale = FALSE, datapch = 20)
+
+fdanishRun.ln.MLE <- fitdist(RunYardsPerPlay, "logis")
+fdanishRun.ln.MME <- fitdist(RunYardsPerPlay, "logis", method = "mme",  order = 1:2)
+cdfcomp(list(fdanishRun.ln.MLE, fdanishRun.ln.MME),
+ legend = c("Logitics MLE", "Logistics MME"),
+main = "Fitting a Logistics distribution for Run Plays",
+  xlogscale = FALSE, datapch = 20)
+
+
+```
+
+**Comment:** Looks like the MLE and MME are performing almost identically. However, I will recommend using MLE is this case. 

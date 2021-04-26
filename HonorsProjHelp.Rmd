@@ -1,0 +1,48 @@
+---
+title: "SampleOfHonorsProjectForHelp"
+author: "Logan Robert McGuire"
+date: "January 20, 2021"
+output: html_document
+---
+
+```{r}
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(stats4)
+library(vcd)
+seasons <- 2010:2020
+pbp <- purrr::map_df(seasons, function(x) {
+  readr::read_csv(
+    glue::glue("https://raw.githubusercontent.com/guga31bb/nflfastR-data/master/data/play_by_play_{x}.csv.gz")
+  )
+})
+#pbp stands for PLAY BY PLAY
+
+#seperates master data set into run vs. pass
+pbp_runs <- pbp %>%
+  filter(play_type == 'run')
+pbp_pass <- pbp %>%
+  filter(play_type == 'pass')
+
+
+#grabs yards gained for all plays of given play type
+RunYardsPerPlay <- pbp_runs$yards_gained
+PassYardsPerPlay <- pbp_pass$yards_gained
+runpercentage = 100*nrow(pbp_runs) / (nrow(pbp_runs) + nrow(pbp_pass))
+print("In 2001, the run selection probability was:")
+print(runpercentage)
+min(RunYardsPerPlay)
+
+#graph run yards per play, and associated density function
+hist(RunYardsPerPlay, xlab="Yards Gained on Individual Run Plays", 
+     main = "Histogram of Yardage Gained on Run Plays", breaks = 100, freq = FALSE, xlim = c(0,100))
+lines(density(RunYardsPerPlay), col = 'red')
+
+#graphs pass yards per play and associated density functions
+hist(PassYardsPerPlay, xlab="Yards Gained on Individual Pass Plays",
+     main = "Histogram of Yardage Gained on Pass Plays", breaks = 100, freq = FALSE, xlim = c(0,100))
+lines(density(PassYardsPerPlay), col = 'red')
+
+```
+

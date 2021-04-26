@@ -1,0 +1,355 @@
+---
+title: "TimeAnalysis"
+author: "Logan Robert McGuire"
+date: "February 10, 2021"
+output: html_document
+---
+
+```{r}
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(stats4)
+library(vcd)
+library(tidyverse)
+library(plyr)
+seasons <- 2010:2020
+pbp <- purrr::map_df(seasons, function(x) {
+  readr::read_csv(
+    glue::glue("https://raw.githubusercontent.com/guga31bb/nflfastR-data/master/data/play_by_play_{x}.csv.gz")
+  )
+})
+#pbp stands for PLAY BY PLAY
+
+#Add playtime into every play for the data set
+#EXAMINE THE FILTERING THE BETTER
+pbp <- pbp %>% dplyr::select(game_id, quarter_seconds_remaining, game_seconds_remaining, qtr, down, time, play_type, yards_gained, pass_length, field_goal_result, field_goal_attempt, kick_distance, extra_point_result, extra_point_attempt, two_point_attempt, two_point_conv_result, defteam_score, posteam_score, qb_kneel, fumble_lost, interception, complete_pass, punt_attempt, run_gap, qb_spike)
+
+pbp_nonspecial <- pbp %>%
+  filter(down != 'NA')
+pbp_nonspecial <- pbp_nonspecial[seq(dim(pbp_nonspecial)[1],1),]
+pbp_nonspecial = pbp_nonspecial %>% group_by(game_id) %>% mutate(diff = c(NA,diff(quarter_seconds_remaining)))
+
+pbp_nonspecial = pbp_nonspecial[!(pbp_nonspecial$diff == "NA"),] 
+pbp_nonspecial = pbp_nonspecial[!(pbp_nonspecial$diff < 0),] 
+
+pbp_runs <- pbp_nonspecial %>%
+  filter(play_type == 'run')
+pbp_pass <- pbp_nonspecial %>%
+  filter(play_type == 'pass')
+pbp_rounded = pbp_nonspecial %>% group_by(game_id) %>% mutate(diff = c(NA,(ceiling((diff(quarter_seconds_remaining)/7)))*7))
+pbp_rounded = pbp_rounded[!(pbp_rounded$diff == "NA" | pbp_rounded$diff < 0), ]
+pbp_rounded$diff[which(pbp_rounded$diff == 0)] = 7
+```
+
+
+```{r}
+#GENERAL PLAYS
+pbp_RunInside <- pbp_runs %>%
+  filter(run_gap == 'guard' | run_gap == 'tackle')
+pbp_RunOutside <- pbp_runs %>%
+  filter(run_gap == 'end')
+pbp_PassShort <- pbp_pass %>%
+  filter(pass_length == 'short' & complete_pass == 1)
+pbp_PassDeep <- pbp_pass %>%
+  filter(pass_length == 'deep' & complete_pass == 1)
+pbp_IncPassShort <- pbp_pass %>%
+  filter(pass_length == 'short' & complete_pass == 0)
+pbp_IncPassDeep <- pbp_pass %>%
+  filter(pass_length == 'deep' & complete_pass == 0)
+
+#grabs time per play for all plays of given play type
+TimeForRunInside <- pbp_RunInside$diff
+TimeForRunOutside <-pbp_RunOutside$diff
+TimeForPassShort <- pbp_PassShort$diff
+TimeForPassDeep <- pbp_PassDeep$diff
+TimeForIncPassShort <- pbp_IncPassShort$diff
+TimeForIncPassDeep <- pbp_IncPassDeep$diff
+
+#graphs time per play for each type
+hist(TimeForRunInside, xlab="Seconds Per Play", 
+     main = "Time Per Play for Inside Runs", breaks = 50, freq = FALSE, xlim = c(0,60))
+
+hist(TimeForRunOutside, xlab="Seconds Per Play", 
+     main = "Time Per Play for Outside Runs", breaks = 50, freq = FALSE, xlim = c(0,60))
+
+hist(TimeForPassShort, xlab="Seconds Per Play", 
+     main = "Time Per Play for Short Completions", breaks = 50, freq = FALSE, xlim = c(0,60))
+
+hist(TimeForPassDeep, xlab="Seconds Per Play", 
+     main = "Time Per Play for Deep Completions", breaks = 50, freq = FALSE, xlim = c(0,60))
+
+hist(TimeForIncPassShort, xlab="Seconds Per Play", 
+     main = "Time Per Play for Short Incompletions", breaks = 50, freq = FALSE, xlim = c(0,60))
+
+hist(TimeForIncPassDeep, xlab="Seconds Per Play", 
+     main = "Time Per Play for Deep Incompletions", breaks = 50, freq = FALSE, xlim = c(0,60))
+
+
+```
+
+
+```{r}
+#GENERAL PLAYS
+pbp_RunInsideRounded <- pbp_rounded %>%
+  filter(run_gap == 'guard' | run_gap == 'tackle')
+pbp_RunInsideRounded <- pbp_RunInsideRounded %>%
+  filter(diff <= 60)
+pbp_RunOutsideRounded <- pbp_rounded %>%
+  filter(run_gap == 'end' & diff <= 60)
+pbp_PassShortRounded <- pbp_rounded %>%
+  filter(pass_length == 'short' & complete_pass == 1 & diff <= 60)
+pbp_PassDeepRounded <- pbp_rounded %>%
+  filter(pass_length == 'deep' & complete_pass == 1 & diff <= 60)
+pbp_IncPassShortRounded <- pbp_rounded %>%
+  filter(pass_length == 'short' & complete_pass == 0 & diff <= 60)
+pbp_IncPassDeepRounded <- pbp_rounded %>%
+  filter(pass_length == 'deep' & complete_pass == 0 & diff <= 60)
+
+#grabs time per play for all plays of given play type
+RoundedTimeForRunInside <- pbp_RunInsideRounded$diff
+prop.table(table(RoundedTimeForRunInside))
+RoundedTimeForRunOutside <-pbp_RunOutsideRounded$diff
+prop.table(table(RoundedTimeForRunOutside))
+RoundedTimeForPassShort <- pbp_PassShortRounded$diff
+prop.table(table(RoundedTimeForPassShort))
+RoundedTimeForPassDeep <- pbp_PassDeepRounded$diff
+prop.table(table(RoundedTimeForPassDeep))
+RoundedTimeForIncPassShort <- pbp_IncPassShortRounded$diff
+prop.table(table(RoundedTimeForIncPassShort))
+RoundedTimeForIncPassDeep <- pbp_IncPassDeepRounded$diff
+prop.table(table(RoundedTimeForIncPassDeep))
+
+#graphs time per play for each type
+hist(RoundedTimeForRunInside, xlab="Seconds Per Play", 
+     main = "Rounded Time Per Play for Inside Runs", breaks = 50, freq = FALSE, xlim = c(0,60))
+
+hist(RoundedTimeForRunOutside, xlab="Seconds Per Play", 
+     main = "Rounded Time Per Play for Outside Runs", breaks = 50, freq = FALSE, xlim = c(0,60))
+
+hist(RoundedTimeForPassShort, xlab="Seconds Per Play", 
+     main = "Rounded Time Per Play for Short Completions", breaks = 50, freq = FALSE, xlim = c(0,60))
+
+hist(RoundedTimeForPassDeep, xlab="Seconds Per Play", 
+     main = "Rounded Time Per Play for Deep Completions", breaks = 50, freq = FALSE, xlim = c(0,60))
+
+pdf("RITimeDistribution.pdf")
+par(mfrow = c(2, 1))
+hist(TimeForRunInside, xlab="Seconds Per Play", 
+     main = "Time Per Play for Inside Runs", breaks = 50, freq = FALSE, xlim = c(0,60))
+hist(RoundedTimeForRunInside, xlab="Seconds Per Play", 
+     main = "Rounded Time Per Play for Inside Runs", breaks = 50, freq = FALSE, xlim = c(0,60))
+dev.off()
+
+
+```
+
+
+
+
+
+
+```{r}
+#TEAM THAT IS LEADING: 2 MIN CLOSE GAME
+pbp_2min_closegame <- pbp_nonspecial  %>%
+  filter(game_seconds_remaining <= 120 & (defteam_score-posteam_score) >= -8 
+         & (defteam_score-posteam_score) <= 0)
+
+pbp_2MCGRunsTime <- pbp_2min_closegame %>%
+  filter(play_type == 'run' & qb_kneel == 0)
+pbp_2MCGPassTime <- pbp_2min_closegame %>%
+  filter(play_type == 'pass')
+pbp_2MCGCompletionTime <- pbp_2min_closegame %>%
+  filter(play_type == 'pass' & complete_pass == 1)
+pbp_2MCGIncompletionTime <- pbp_2min_closegame %>%
+  filter(play_type == 'pass' & complete_pass == 0)
+
+#grabs time per play for all plays of given play type
+TimeFor2MCGRuns <- pbp_2MCGRunsTime$diff
+TimeFor2MCGPasses <-pbp_2MCGPassTime$diff
+TimeFor2MCGCompletions <- pbp_2MCGCompletionTime$diff
+TimeFor2MCGIncompletions <- pbp_2MCGIncompletionTime$diff
+
+#graphs time per play for each type
+hist(TimeFor2MCGRuns, xlab="Seconds Per Play", 
+     main = "2 MIN CLOSE GAME, OFFENSE IS WINNING: Time Per Play for Runs", breaks = 40, freq = FALSE, xlim = c(0,100))
+
+hist(TimeFor2MCGPasses, xlab="Seconds Per Play", 
+     main = "2 MIN CLOSE GAME, OFFENSE IS WINNING: Time Per Play for Passes", breaks = 40, freq = FALSE, xlim = c(0,100))
+
+hist(TimeFor2MCGCompletions, xlab="Seconds Per Play", 
+     main = "2 MIN CLOSE GAME, OFFENSE IS WINNING: Time Per Play for Completions", breaks = 40, freq = FALSE, xlim = c(0,100))
+
+hist(TimeFor2MCGIncompletions, xlab="Seconds Per Play", 
+     main = "2 MIN CLOSE GAME, OFFENSE IS WINNING: Time Per Play for Incompletions", breaks = 40, freq = FALSE, xlim = c(0,100))
+
+
+```
+
+
+
+```{r}
+#TEAM THAT IS LOSING: 2 MIN CLOSE GAME
+pbp_2min_closegame <- pbp_nonspecial  %>%
+  filter(game_seconds_remaining <= 120 & (defteam_score-posteam_score) <= 8 &
+           (defteam_score-posteam_score) >= 0)
+
+pbp_2MCGRunsTime <- pbp_2min_closegame %>%
+  filter(play_type == 'run')
+pbp_2MCGPassTime <- pbp_2min_closegame %>%
+  filter(play_type == 'pass')
+pbp_2MCGCompletionTime <- pbp_2min_closegame %>%
+  filter(play_type == 'pass' & complete_pass == 1)
+pbp_2MCGIncompletionTime <- pbp_2min_closegame %>%
+  filter(play_type == 'pass' & complete_pass == 0)
+
+#grabs time per play for all plays of given play type
+TimeFor2MCGRuns <- pbp_2MCGRunsTime$diff
+TimeFor2MCGPasses <-pbp_2MCGPassTime$diff
+TimeFor2MCGCompletions <- pbp_2MCGCompletionTime$diff
+TimeFor2MCGIncompletions <- pbp_2MCGIncompletionTime$diff
+
+#graphs time per play for each type
+hist(TimeFor2MCGRuns, xlab="Seconds Per Play", 
+     main = "2 MIN CLOSE GAME, OFFENSE IS LOSING: Time Per Play for Runs", breaks = 50, freq = FALSE, xlim = c(0,100))
+
+hist(TimeFor2MCGPasses, xlab="Seconds Per Play", 
+     main = "2 MIN CLOSE GAME, OFFENSE IS LOSING: Time Per Play for Passes", breaks = 50, freq = FALSE, xlim = c(0,100))
+
+hist(TimeFor2MCGCompletions, xlab="Seconds Per Play", 
+     main = "2 MIN CLOSE GAME, OFFENSE IS LOSING: Time Per Play for Completions", breaks = 50, freq = FALSE, xlim = c(0,100))
+
+hist(TimeFor2MCGIncompletions, xlab="Seconds Per Play", 
+     main = "2 MIN CLOSE GAME, OFFENSE IS LOSING: Time Per Play for Incompletions", breaks = 50, freq = FALSE, xlim = c(0,100))
+
+
+```
+
+
+
+
+```{r}
+#TEAM THAT IS LEADING: 4 MINUTE CLOSE GAME
+pbp_4min_closegame <- pbp_nonspecial  %>%
+  filter(game_seconds_remaining <= 240 & (defteam_score-posteam_score) >= -16 
+         & (defteam_score-posteam_score) <= 0)
+
+pbp_4MCGRunsTime <- pbp_4min_closegame %>%
+  filter(play_type == 'run' & qb_kneel == 0)
+pbp_4MCGPassTime <- pbp_4min_closegame %>%
+  filter(play_type == 'pass')
+pbp_4MCGCompletionTime <- pbp_4min_closegame %>%
+  filter(play_type == 'pass' & complete_pass == 1)
+pbp_4MCGIncompletionTime <- pbp_4min_closegame %>%
+  filter(play_type == 'pass' & complete_pass == 0)
+
+#grabs time per play for all plays of given play type
+TimeFor4MCGRuns <- pbp_4MCGRunsTime$diff
+TimeFor4MCGPasses <-pbp_4MCGPassTime$diff
+TimeFor4MCGCompletions <- pbp_4MCGCompletionTime$diff
+TimeFor4MCGIncompletions <- pbp_4MCGIncompletionTime$diff
+
+#graphs time per play for each type
+hist(TimeFor4MCGRuns, xlab="Seconds Per Play", 
+     main = "4 MIN CLOSE GAME, OFFENSE IS WINNING: Time Per Play for Runs", breaks = 50, freq = FALSE, xlim = c(0,100))
+
+hist(TimeFor4MCGPasses, xlab="Seconds Per Play", 
+     main = "4 MIN CLOSE GAME, OFFENSE IS WINNING: Time Per Play for Passes", breaks = 50, freq = FALSE, xlim = c(0,100))
+
+hist(TimeFor4MCGCompletions, xlab="Seconds Per Play", 
+     main = "4 MIN CLOSE GAME, OFFENSE IS WINNING: Time Per Play for Completions", breaks = 50, freq = FALSE, xlim = c(0,100))
+
+hist(TimeFor4MCGIncompletions, xlab="Seconds Per Play", 
+     main = "4 MIN CLOSE GAME, OFFENSE IS WINNING: Time Per Play for Incompletions", breaks = 50, freq = FALSE, xlim = c(0,100))
+```
+
+
+
+```{r}
+#TEAM THAT IS LOSING: 4 MIN CLOSE GAME
+pbp_4min_closegame <- pbp_nonspecial  %>%
+  filter(game_seconds_remaining <= 240 & (defteam_score-posteam_score) <= 16 
+         & (defteam_score-posteam_score) >= 0)
+
+pbp_4MCGRunsTime <- pbp_4min_closegame %>%
+  filter(play_type == 'run' & qb_kneel == 0)
+pbp_4MCGPassTime <- pbp_4min_closegame %>%
+  filter(play_type == 'pass')
+pbp_4MCGCompletionTime <- pbp_4min_closegame %>%
+  filter(play_type == 'pass' & complete_pass == 1)
+pbp_4MCGIncompletionTime <- pbp_4min_closegame %>%
+  filter(play_type == 'pass' & complete_pass == 0)
+
+#grabs time per play for all plays of given play type
+TimeFor4MCGRuns <- pbp_4MCGRunsTime$diff
+TimeFor4MCGPasses <-pbp_4MCGPassTime$diff
+TimeFor4MCGCompletions <- pbp_4MCGCompletionTime$diff
+TimeFor4MCGIncompletions <- pbp_4MCGIncompletionTime$diff
+
+#graphs time per play for each type
+hist(TimeFor4MCGRuns, xlab="Seconds Per Play", 
+     main = "4 MIN CLOSE GAME, OFFENSE IS LOSING: Time Per Play for Runs", breaks = 50, freq = FALSE, xlim = c(0,100))
+
+hist(TimeFor4MCGPasses, xlab="Seconds Per Play", 
+     main = "4 MIN CLOSE GAME, OFFENSE IS LOSING: Time Per Play for Passes", breaks = 50, freq = FALSE, xlim = c(0,100))
+
+hist(TimeFor4MCGCompletions, xlab="Seconds Per Play", 
+     main = "4 MIN CLOSE GAME, OFFENSE IS LOSING: Time Per Play for Completions", breaks = 50, freq = FALSE, xlim = c(0,100))
+
+hist(TimeFor4MCGIncompletions, xlab="Seconds Per Play", 
+     main = "4 MIN CLOSE GAME, OFFENSE IS LOSING: Time Per Play for Incompletions", breaks = 50, freq = FALSE, xlim = c(0,100))
+
+
+```
+
+
+```{r}
+#fitting distributions to time data
+#library(fitdistrplus)
+#fnTimeRun.S <- fitdist(TimeFor2MCGRuns, "norm")
+#flTimeRun.S <- fitdist(TimeFor2MCGRuns, "logis")
+#fpTimeRun.S <- fitdist(TimeFor2MCGRuns, "pois")
+#fwTimeRun.S <- fitdist(TimeFor2MCGRuns + 1, "weibull")
+#LOGNORMAL!!!!
+
+#DISCRETE DISTRIBUTIONS
+#par(mfrow = c(2, 2))
+#plotComplS.legend <- c("poisson", "weibull")
+#denscomp(list(fpTimeRun.S, fwTimeRun.S), legendtext = plotComplS.legend)
+#qqcomp(list(fpTimeRun.S, fwTimeRun.S), legendtext = plotComplS.legend)
+#cdfcomp(list(fpTimeRun.S, fwTimeRun.S), legendtext = plotComplS.legend)
+#ppcomp(list(fpTimeRun.S, fwTimeRun.S), legendtext = plotComplS.legend)
+
+#To see continuous histogram
+#plotComplS.legend <- c("normal", "logistic")
+#denscomp(list(fnTimeRun.S, flTimeRun.S), legendtext = plotComplS.legend)
+#qqcomp(list(fnTimeRun.S, flTimeRun.S), legendtext = plotComplS.legend)
+#cdfcomp(list(fnTimeRun.S, flTimeRun.S), legendtext = plotComplS.legend)
+#ppcomp(list(fnTimeRun.S, flTimeRun.S), legendtext = plotComplS.legend)
+```
+
+
+```{r}
+#fitting distributions to time data
+#fnTimeCompletion.S <- fitdist(TimeFor2MCGCompletions, "norm")
+#flTimeCompletion.S <- fitdist(TimeFor2MCGCompletions, "logis")
+#fpTimeCompletion.S <- fitdist(TimeFor2MCGCompletions, "pois")
+#fwTimeCompletion.S <- fitdist(TimeFor2MCGCompletions, "weibull")
+#LOGNORMAL!!!!
+
+#DISCRETE DISTRIBUTIONS
+#par(mfrow = c(2, 2))
+#plotComplS.legend <- c("poisson", "weibull")
+#denscomp(list(fpTimeCompletion.S, fwTimeCompletion.S), legendtext = plotComplS.legend)
+#qqcomp(list(fpTimeCompletion.S, fwTimeCompletion.S), legendtext = plotComplS.legend)
+#cdfcomp(list(fpTimeCompletion.S, fwTimeCompletion.S), legendtext = plotComplS.legend)
+#ppcomp(list(fpTimeCompletion.S, fwTimeCompletion.S), legendtext = plotComplS.legend)
+
+#To see continuous histogram
+#plotComplS.legend <- c("normal", "logistic")
+#denscomp(list(fnTimeCompletion.S, flTimeCompletion.S), legendtext = plotComplS.legend)
+#qqcomp(list(fnTimeCompletion.S, flTimeCompletion.S), legendtext = plotComplS.legend)
+#cdfcomp(list(fnTimeCompletion.S, flTimeCompletion.S), legendtext = plotComplS.legend)
+#ppcomp(list(fnTimeCompletion.S, flTimeCompletion.S), legendtext = plotComplS.legend)
+```
+

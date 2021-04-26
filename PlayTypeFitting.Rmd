@@ -1,0 +1,211 @@
+---
+title: "FittingPlayTypes"
+author: "Logan Robert McGuire"
+date: "February 18, 2021"
+output: html_document
+---
+
+```{r}
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(stats4)
+library(vcd)
+library(fitdistrplus)
+library(binom)
+
+seasons <- 2010:2020
+#pbp <- purrr::map_df(seasons, function(x) {
+#  readr::read_csv(
+#    glue::glue("https://raw.githubusercontent.com/guga31bb/nflfastR-data/master/data/play_by_play_{x}.csv.gz")
+#  )
+#})
+```
+
+```{r}
+pbp_runs <- pbp %>%
+  filter(play_type == 'run')
+pbp_pass <- pbp %>%
+  filter(play_type == 'pass')
+```
+
+```{r}
+pbp_RunInside <- pbp_runs %>%
+  filter(run_gap == 'guard' | run_gap == 'tackle')
+pbp_RunOutside <- pbp_runs %>%
+  filter(run_gap == 'end')
+pbp_PassShort <- pbp_pass %>%
+  filter(pass_length == 'short' & complete_pass == 1)
+pbp_PassDeep <- pbp_pass %>%
+  filter(pass_length == 'deep' & complete_pass == 1)
+
+```
+
+```{r}
+#fitting distribution and printing statistics
+
+#Run Inside
+fitdistrplus::fitdist(pbp_RunInside$yards_gained, "logis")
+
+#Run Outside
+fitdistrplus::fitdist(pbp_RunOutside$yards_gained, "logis")
+
+#Pass Short
+fitdistrplus::fitdist(pbp_PassShort$yards_gained, "logis")
+
+#Pass Deep
+fitdistrplus::fitdist(pbp_PassDeep$yards_gained, "logis")
+
+```
+
+```{r}
+pdf("PlayDistributions.pdf")
+par(mfrow = c(2,2))
+
+hist(pbp_RunInside$yards_gained, xlab="Yards", 
+     main = "Yards Gained on Inside Runs", breaks = 100, freq = FALSE, xlim = c(0,100))
+hist(pbp_RunOutside$yards_gained, xlab="Yards", 
+     main = "Yards Gained on Outside Runs", breaks = 100, freq = FALSE, xlim = c(0,100))
+hist(pbp_PassShort$yards_gained, xlab="Yards", 
+     main = "Yards Gained on Short Passes", breaks = 100, freq = FALSE, xlim = c(0,100))
+hist(pbp_PassDeep$yards_gained, xlab="Yards", 
+     main = "Yards Gained on Deep Passes", breaks = 100, freq = FALSE, xlim = c(0,100))
+dev.off()
+
+```
+
+
+```{r}
+pbp_PassShortIncom <- pbp_pass %>%
+  filter(pass_length == 'short' & complete_pass == 0)
+
+ShortCompletionCount = nrow(pbp_PassShort)
+ShortIncompletionCount = nrow(pbp_PassShortIncom)
+total_short_count= ShortIncompletionCount + ShortCompletionCount
+binom.confint(ShortCompletionCount, total_short_count)
+
+```
+
+```{r}
+pbp_PassDeepIncom <- pbp_pass %>%
+  filter(pass_length == 'deep' & complete_pass == 0)
+
+DeepCompletionCount = nrow(pbp_PassDeep)
+DeepIncompletionCount = nrow(pbp_PassDeepIncom)
+total_deep_count= DeepIncompletionCount + DeepCompletionCount
+binom.confint(DeepCompletionCount, total_deep_count)
+```
+```{r}
+pbp_PassDeepInterception <- pbp_pass %>%
+  filter(pass_length == 'deep' & interception == 1)
+pbp_PassDeepFumble <- pbp_pass %>%
+  filter(pass_length == 'deep' & fumble_lost == 1)
+
+DeepIntCount = nrow(pbp_PassDeepInterception)
+DeepFumbleCount = nrow(pbp_PassDeepFumble)
+total_deep_turnover = DeepIntCount + DeepFumbleCount
+binom.confint(total_deep_turnover,total_deep_count)
+```
+
+```{r}
+pbp_PassShortInterception <- pbp_pass %>%
+  filter(pass_length == 'short' & interception == 1)
+pbp_PassShortFumble <- pbp_pass %>%
+  filter(pass_length == 'short' & fumble_lost == 1)
+
+ShortIntCount = nrow(pbp_PassShortInterception)
+ShortFumbleCount = nrow(pbp_PassShortFumble)
+total_short_turnover = ShortIntCount + ShortFumbleCount
+binom.confint(total_short_turnover,total_short_count)
+```
+```{r}
+pbp_RunInsideFumble <- pbp_RunInside %>%
+  filter(fumble_lost == 1)
+
+RunInsideCount = nrow(pbp_RunInside)
+RunInsideFumbleCount = nrow(pbp_RunInsideFumble)
+binom.confint(RunInsideFumbleCount,RunInsideCount)
+```
+```{r}
+pbp_RunOutsideFumble <- pbp_RunOutside %>%
+  filter(fumble_lost == 1)
+
+RunOutsideCount = nrow(pbp_RunOutside)
+RunOutsideFumbleCount = nrow(pbp_RunOutsideFumble)
+binom.confint(RunOutsideFumbleCount,RunOutsideCount)
+```
+
+```{r}
+#seasons <- 2015:2020
+#pbp_newPATRule <- purrr::map_df(seasons, function(x) {
+#  readr::read_csv(
+#    glue::glue("https://raw.githubusercontent.com/guga31bb/nflfastR-data/master/data/play_by_play_{x}.csv.gz")
+#  )
+#})
+pbp_newPATRule <- pbp_newPATRule %>% dplyr::select(extra_point_result, extra_point_attempt)
+
+pbp_PAT <- pbp_newPATRule %>%
+  filter(extra_point_attempt == 1 )
+pbp_PATMake <- pbp_newPATRule %>%
+  filter(extra_point_result == 'good')
+
+ExtraPointCount = nrow(pbp_PAT)
+ExtraPointMadeCount = nrow(pbp_PATMake)
+binom.confint(ExtraPointMadeCount,ExtraPointCount)
+```
+
+```{r}
+pbp_2pt <- pbp %>%
+  filter(two_point_attempt == 1)
+pbp_2ptSuccess <- pbp_2pt %>%
+  filter(two_point_conv_result == 'success')
+
+TwoPointCount = nrow(pbp_2pt)
+TwoPointMadeCount = nrow(pbp_2ptSuccess)
+binom.confint(TwoPointMadeCount,TwoPointCount)
+```
+
+
+
+
+
+```{r}
+pbp_fieldgoal <- pbp %>%
+  filter(field_goal_attempt == 1)
+pbp_fieldgoalLT20 <- pbp_fieldgoal %>%
+  filter(kick_distance < 20)
+pbp_fieldgoal20t29 <- pbp_fieldgoal %>%
+  filter(kick_distance >= 20 & kick_distance <= 29)
+pbp_fieldgoal30t39 <- pbp_fieldgoal %>%
+  filter(kick_distance >= 30 & kick_distance <= 39)
+pbp_fieldgoal40t49 <- pbp_fieldgoal %>%
+  filter(kick_distance >= 20 & kick_distance <= 49)
+pbp_fieldgoal50plus <- pbp_fieldgoal %>%
+  filter(kick_distance >= 50)
+
+ShortestFGCount = nrow(pbp_fieldgoalLT20)
+SecondTierFGCount = nrow(pbp_fieldgoal20t29)
+ThirdTierFGCount = nrow(pbp_fieldgoal30t39)
+FourthTierFGCount = nrow(pbp_fieldgoal40t49)
+LongestFGCount = nrow(pbp_fieldgoal50plus)
+
+ShortestFGMake = sum(pbp_fieldgoalLT20$field_goal_result == "made")
+SecondTierFGMake = sum(pbp_fieldgoal20t29$field_goal_result == "made")
+ThirdTierFGMake = sum(pbp_fieldgoal30t39$field_goal_result == "made")
+FourthTierFGMake = sum(pbp_fieldgoal40t49$field_goal_result == "made")
+LongestFGMake = sum(pbp_fieldgoal50plus$field_goal_result == "made")
+
+binom.confint(ShortestFGMake,ShortestFGCount)
+binom.confint(SecondTierFGMake, SecondTierFGCount)
+binom.confint(ThirdTierFGMake,ThirdTierFGCount)
+binom.confint(FourthTierFGMake,FourthTierFGCount)
+binom.confint(LongestFGMake,LongestFGCount)
+```
+
+
+
+
+
+
+
+

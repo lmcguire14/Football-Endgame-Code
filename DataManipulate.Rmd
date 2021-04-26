@@ -1,0 +1,533 @@
+---
+title: "DataManipulate"
+author: "Logan Robert McGuire"
+date: "November 17, 2020"
+output: html_document
+---
+```{r}
+# Reading in data, necessary libraries
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(stats4)
+library(vcd)
+
+seasons <- 2010:2020
+#pbp <- purrr::map_df(seasons, function(x) {
+#  readr::read_csv(
+#    glue::glue("https://raw.githubusercontent.com/guga31bb/nflfastR-data/master/data/play_by_play_{x}.csv.gz")
+#  )
+#})
+```
+
+```{r}
+#makes 2 new data sets, one with only run plays, the other with only pass plays
+
+#For shapiro wilks test if the p-value > 0.05 that implies that the distribution of the data is not significantly different from normal distribution. In other words, we can assume the normality.
+#for qqplots we want to see extreme linearity
+
+pbp_runs <- pbp %>%
+  filter(play_type == 'run')
+pbp_pass <- pbp %>%
+  filter(play_type == 'pass')
+#grabs yards gained for all plays of given play type
+RunYardsPerPlay <- pbp_runs$yards_gained
+dens <- density(RunYardsPerPlay)
+PassYardsPerPlay <- pbp_pass$yards_gained
+runpercentage = 100*nrow(pbp_runs) / (nrow(pbp_runs) + nrow(pbp_pass))
+print("In 2001, the run selection probability was:")
+print(runpercentage)
+min(RunYardsPerPlay)
+
+hist(RunYardsPerPlay, xlab="Yards Gained on Individual Run Plays", 
+     main = "Histogram of Yardage Gained on Run Plays", breaks = 100, freq = FALSE, xlim = c(0,100))
+hist(PassYardsPerPlay, xlab="Yards Gained on Individual Pass Plays",
+     main = "Histogram of Yardage Gained on Pass Plays", breaks = 100, freq = FALSE, xlim = c(0,100))
+
+#makes histograms of yards gained for each type of play
+library(MASS)
+library(fitdistrplus)
+
+#fit_w  <- fitdist(RunYardsPerPlay, "weibull")
+#fit_g  <- fitdist(RunYardsPerPlay, "gamma")
+#fit_ln <- fitdist(RunYardsPerPlay, "lnorm")
+#fit_pois <- fitdist(RunYardsPerPlay, "pois")
+#print(fit_pois)
+#print(fit_w)
+
+#plotdist(RunYardsPerPlay, histo = TRUE, demp = TRUE)
+#plot.legend <- c("Weibull", "lognormal", "gamma", "pois")
+#denscomp(list(fit_w, fit_g, fit_ln,fit_pois), legendtext = plot.legend)
+#cdfcomp (list(fit_w, fit_g, fit_ln,fit_pois), legendtext = plot.legend)
+#qqcomp  (list(fit_w, fit_g, fit_ln,fit_pois), legendtext = plot.legend)
+#ppcomp  (list(fit_w, fit_g, fit_ln,fit_pois), legendtext = plot.legend)
+
+
+#GOT ALL OF THE ABOVE CODE from http://www.di.fc.ul.pt/~jpn/r/distributions/fitting.html
+hist(RunYardsPerPlay, xlab="Yards Gained on Individual Run Plays", 
+     main = "Histogram of Yardage Gained on Run Plays", breaks = 100, freq = FALSE, xlim = c(0,100))
+lines(density(RunYardsPerPlay), col = 'red')
+#fitdistr(RunYardsPerPlay, "gamma")
+#gf <-goodfit(RunYardsPerPlay, type = 'poisson' ,method = "MinChisq")
+#summary(gf)
+#plot(gf, main = "Count Data vs. Gamma")
+
+#qqnorm(pbp_runsend$yards_gained)
+summary(pbp_runs$yards_gained)
+#shapiro.test(pbp_runsend$yards_gained)
+
+hist(PassYardsPerPlay, xlab="Yards Gained on Individual Pass Plays",
+     main = "Histogram of Yardage Gained on Pass Plays", breaks = 100, freq = FALSE, xlim = c(0,100))
+lines(density(PassYardsPerPlay), col = 'red')
+#summary(RunYardsPerPlay)
+#nclass.FD(RunYardsPerPlay)
+
+#qqnorm(pbp_runsend$yards_gained)
+summary(pbp_pass$yards_gained)
+            #amount of incomplete passes (ie yards gained = 0) is in the neighborhood of 7000
+
+
+
+```
+
+
+```{r}
+#histograms of directional runs + summary statistics of each
+
+hist(RunYardsPerPlay, xlab="Yards Gained on Individual Run Plays", 
+     main = "Histogram of Yardage Gained on Run Plays", breaks = 100, freq = FALSE, xlim = c(0,100))
+
+pbp_runsleft <- pbp %>%
+  filter(play_type == 'run' & run_location == "left")
+RunYardsPerPlayLeft <- pbp_runsleft$yards_gained
+hist(RunYardsPerPlayLeft, xlab="Yards Gained on Individual Left Run", 
+     main = "Histogram of Yardage Gained on Left Run Plays", breaks = 100, freq = FALSE, xlim = c(0,100))
+
+#qqnorm(pbp_runsleft$yards_gained)
+summary(pbp_runsleft$yards_gained)
+#shapiro.test(pbp_runsleft$yards_gained)
+runleftpercentage = 100*nrow(pbp_runsleft) / (nrow(pbp_runs))
+print("In 2001, the percentage of runs that were run to the left was:")
+print(runleftpercentage)
+
+pbp_runsmiddle <- pbp %>%
+  filter(play_type == 'run' & run_location == "middle")
+RunYardsPerPlayMiddle <- pbp_runsmiddle$yards_gained
+hist(RunYardsPerPlayMiddle, xlab="Yards Gained on Individual Middle Run", 
+     main = "Histogram of Yardage Gained on Middle Run Plays", breaks = 100, freq = FALSE, xlim = c(0,100))
+#qqnorm(pbp_runsmiddle$yards_gained)
+summary(pbp_runsmiddle$yards_gained)
+#shapiro.test(pbp_runsmiddle$yards_gained)
+runmiddlepercentage = 100*nrow(pbp_runsmiddle) / (nrow(pbp_runs))
+print("In 2001, the percentage of runs that were run to the middle was:")
+print(runmiddlepercentage)
+
+pbp_runsright <- pbp %>%
+  filter(play_type == 'run' & run_location == "right")
+RunYardsPerPlayRight <- pbp_runsright$yards_gained
+
+#set.seed(10001)
+#RunYardsPerPlayRight <- pbp_runs$yards_gained - min(pbp_runs$yards_gained) + 1
+
+#f1 <- fitdistr(RunYardsPerPlayRight, "lognormal")
+#f2 <- fitdistr(RunYardsPerPlayRight, "Gamma")
+#hist(pbp_runsright$yards_gained - min(pbp_runs$yards_gained) + 1, xlab="Yards Gained on Individual Run Right Plays",
+#     main = "Histogram of Yardage Gained on Run Right Plays", breaks = 100, freq = FALSE, xlim = c(0,100))
+#with(as.list(coef(f1)),
+#     curve(dlnorm(x,meanlog,sdlog),
+#           add=TRUE,col="red",lwd=2))
+#with(as.list(coef(f2)),
+#     curve(dgamma(x,shape=shape,rate=rate),
+#           add=TRUE,col="blue",lwd=2))
+
+
+hist(RunYardsPerPlayRight, xlab="Yards Gained on Individual Right Run", 
+     main = "Histogram of Yardage Gained on Right Run Plays", breaks = 100, freq = FALSE, xlim = c(0,100))
+
+
+#qqnorm(pbp_runsright$yards_gained)
+summary(pbp_runsright$yards_gained)
+#shapiro.test(pbp_runsright$yards_gained)
+runrightpercentage = 100*nrow(pbp_runsright) / (nrow(pbp_runs))
+print("In 2001, the percentage of runs that were run to the right was:")
+print(runrightpercentage)
+
+df_2minexport = data.frame(value=twominyards)
+df_RunLexport = data.frame(value=pbp_runsleft$yards_gained)
+df_RunMexport = data.frame(value=pbp_runsmiddle$yards_gained)
+df_RunRexport = data.frame(value=pbp_runsright$yards_gained)
+
+write.csv(df_2minexport, "2min.csv")
+write.csv(df_RunLexport, "RunsLeftYdg.csv")
+write.csv(df_RunMexport, "RunsMidYdg.csv")
+write.csv(df_RunRexport, "RunsRightYdg.csv")
+
+```
+
+```{r}
+pdf("RunDistributions.pdf")
+par(mfrow = c(2,2))
+
+hist(RunYardsPerPlay, xlab="Yards", 
+     main = "Yardage Gained on Run Plays", breaks = 100, freq = FALSE, xlim = c(0,100))
+hist(RunYardsPerPlayLeft, xlab="Yards", 
+     main = "Yards Gained on Left Runs", breaks = 100, freq = FALSE, xlim = c(0,100))
+hist(RunYardsPerPlayMiddle, xlab="Yards", 
+     main = "Yards Gained on Middle Runs", breaks = 100, freq = FALSE, xlim = c(0,100))
+hist(RunYardsPerPlayRight, xlab="Yards", 
+     main = "Yards Gained on Right Runs", breaks = 100, freq = FALSE, xlim = c(0,100))
+dev.off()
+
+pdf("PassDistributions.pdf")
+par(mfrow = c(1,2))
+pbp_PassShortAll <- pbp_pass %>%
+  filter(pass_length == 'short')
+pbp_PassDeepAll <- pbp_pass %>%
+  filter(pass_length == 'deep')
+hist(pbp_PassShortAll$yards_gained, xlab="Yards", 
+     main = "Yards Gained on Short Passes", breaks = 100, freq = FALSE, xlim = c(0,100))
+hist(pbp_PassDeepAll$yards_gained, xlab="Yards", 
+     main = "Yards Gained on Deep Passes", breaks = 100, freq = FALSE, xlim = c(0,100))
+dev.off()
+
+```
+
+```{r}
+#histograms of gap runs + summary statistics of each
+pbp_runsguard <- pbp %>%
+  filter(play_type == 'run' & run_gap == "guard")
+RunYardsPerPlayGuard <- pbp_runsguard$yards_gained
+hist(RunYardsPerPlayGuard, xlab="Yards Gained on Individual Guard Runs", 
+     main = "Histogram of Yardage Gained on Guard Run Plays", breaks = 100, freq = FALSE, xlim = c(0,100))
+#qqnorm(pbp_runsguard$yards_gained)
+summary(pbp_runsguard$yards_gained)
+#shapiro.test(pbp_runsguard$yards_gained)
+
+pbp_runstackle <- pbp %>%
+  filter(play_type == 'run' & run_gap == "tackle")
+RunYardsPerPlayTackle <- pbp_runstackle$yards_gained
+hist(RunYardsPerPlayTackle, xlab="Yards Gained on Individual Tackle Run", 
+     main = "Histogram of Yardage Gained on Tackle Run Plays", breaks = 100, freq = FALSE, xlim = c(0,100))
+#qqnorm(pbp_runstackle$yards_gained)
+summary(pbp_runstackle$yards_gained)
+#shapiro.test(pbp_runstackle$yards_gained)
+
+pbp_runsend <- pbp %>%
+  filter(play_type == 'run' & run_gap == "end")
+RunYardsPerPlayEnd <- pbp_runsend$yards_gained
+hist(RunYardsPerPlayEnd, xlab="Yards Gained on Individual End Run", 
+     main = "Histogram of Yardage Gained on End Run Plays", breaks = 100, freq = FALSE, xlim = c(0,100))
+#qqnorm(pbp_runsend$yards_gained)
+summary(pbp_runsend$yards_gained)
+#shapiro.test(pbp_runsend$yards_gained)
+```
+
+```{r}
+#now we would like to see the difference between play calls in the game vs. in the 4th quarter and final 2 minutes
+pbp_offense <- pbp %>%
+  filter(play_type == 'run' | play_type == 'pass')
+pbp_non4thQ <- pbp_offense %>%
+  filter(qtr != '4' & qtr != '5')
+summary(pbp_non4thQ$yards_gained)
+pbp_1stQ <- pbp_offense %>%
+  filter(qtr == '1')
+pbp_2ndQ <- pbp_offense %>%
+  filter(qtr == '2')
+pbp_3rdQ <- pbp_offense %>%
+  filter(qtr == '3')
+pbp_4thQ <- pbp_offense %>%
+  filter(qtr == '4')
+pbp_2min <- pbp_offense  %>%
+  filter(game_seconds_remaining <= 120)
+pbp_2min_closegame <- pbp_offense  %>%
+  filter(game_seconds_remaining <= 120 & (defteam_score-posteam_score) <= 8 & 
+           (defteam_score-posteam_score) >= 0)
+pbp_4min_closegame <- pbp_offense  %>%
+  filter(game_seconds_remaining <= 240 & (defteam_score-posteam_score)  <= 16 
+         & (defteam_score-posteam_score) >= 0)
+
+
+boxplot(pbp$yards_gained~pbp$qtr, data=pbp, main="Overall Yardage Per Play", xlab="Quarter", ylab="Yardage", col="steelblue", border="black")
+boxplot(pbp_pass$yards_gained~pbp_pass$qtr, data=pbp_pass, main="Pass Yardage Per Pass Play", xlab="Quarter", ylab="Yardage", col="steelblue", border="black")
+boxplot(pbp_runs$yards_gained~pbp_runs$qtr, data=pbp_runs, main="Run Yardage Per Run Play", xlab="Quarter", ylab="Yardage", col="steelblue", border="black")
+
+summary(pbp_2min_closegame$yards_gained)
+summary(pbp_4min_closegame$yards_gained)
+
+```
+
+
+```{r}
+#YardsforPassPlays
+pbp_1stQPass <- pbp_1stQ %>%
+  filter(play_type == "pass")
+pbp_2ndQPass <- pbp_2ndQ %>%
+  filter(play_type == "pass")
+pbp_3rdQPass <- pbp_3rdQ %>%
+  filter(play_type == "pass")
+pbp_4thQPass <- pbp_4thQ %>%
+  filter(play_type == "pass")
+pbp_2minPass <- pbp_2min  %>%
+  filter(play_type == "pass")
+pbp_2min_closegamePass <- pbp_2min_closegame  %>%
+  filter(play_type == "pass")
+pbp_4min_closegamePass <- pbp_4min_closegame  %>%
+   filter(play_type == "pass")
+twominpassyards = pbp_2min_closegamePass$yards_gained
+df_2minPass = data.frame(value=twominpassyards, id = "2 Min Close Games Pass Plays")
+fourminpassyards = pbp_4min_closegamePass$yards_gained
+df_4minPass = data.frame(value=fourminpassyards, id = "4 Min Close Games Pass Plays")
+firstqtrpassyards = pbp_1stQPass$yards_gained
+df_1stQPass = data.frame(value= firstqtrpassyards, id = "1st Quarter Pass Plays")
+secondqtrpassyards = pbp_2ndQPass$yards_gained
+df_2ndQPass = data.frame(value= secondqtrpassyards, id = "2nd Quarter Pass Plays")
+thirdqtrpassyards = pbp_3rdQPass$yards_gained
+df_3rdQPass = data.frame(value= thirdqtrpassyards, id = "3rd Quarter Pass Plays")
+df = rbind(df_2minPass, df_4minPass, df_1stQPass, df_2ndQPass, df_3rdQPass)
+ggplot(df, aes(id,value, fill=id)) + geom_boxplot()
+
+passpercentage = 100*nrow(pbp_pass) / (nrow(pbp_runs) + (nrow(pbp_pass)))
+print("In 2001, the probability a pass was called was:")
+print(passpercentage)
+
+firstqpasspercentage = 100*nrow(pbp_1stQPass) / (nrow(pbp_1stQ))
+print("In the first quarter, the probability a pass was called was:")
+print(firstqpasspercentage)
+
+secondqpasspercentage = 100*nrow(pbp_2ndQPass) / (nrow(pbp_2ndQ))
+print("In the second quarter, the probability a pass was called was:")
+print(secondqpasspercentage)
+
+thirdqpasspercentage = 100*nrow(pbp_3rdQPass) / (nrow(pbp_3rdQ))
+print("In the third quarter, the probability a pass was called was:")
+print(thirdqpasspercentage)
+
+twominpasspercentage = 100*nrow(pbp_2min_closegamePass) / (nrow(pbp_2min_closegame))
+print("In 2-min close games, the probability a pass was called was:")
+print(twominpasspercentage)
+
+fourminpasspercentage = 100*nrow(pbp_4min_closegamePass) / (nrow(pbp_4min_closegame))
+print("In 4-min close games, the probability a pass was called was:")
+print(fourminpasspercentage)
+
+
+hist(pbp_2min_closegameRun$yards_gained, xlab="Yards Gained on Individual Run Plays In Close 2 min games", 
+     main = "Histogram of Yardage Gained on Run Plays", breaks = 100, freq = FALSE, xlim = c(0,100))
+lines(density(pbp_2min_closegameRun$yards_gained), col = 'red')
+
+
+#ks.test(pbp_2min_closegameRun$yards_gained, "pweibull")
+
+
+
+```
+
+```{r}
+#YardsforRunPlays
+pbp_1stQRun <- pbp_1stQ %>%
+  filter(play_type == "run")
+pbp_2ndQRun <- pbp_2ndQ %>%
+  filter(play_type == "run")
+pbp_3rdQRun <- pbp_3rdQ %>%
+  filter(play_type == "run")
+pbp_4thQRun <- pbp_4thQ %>%
+  filter(play_type == "run")
+pbp_2minRun <- pbp_2min  %>%
+  filter(play_type == "run")
+pbp_2min_closegameRun <- pbp_2min_closegame  %>%
+  filter(play_type == "run")
+pbp_4min_closegameRun <- pbp_4min_closegame  %>%
+   filter(play_type == "run")
+twominrunyards = pbp_2min_closegameRun$yards_gained
+df_2minRun = data.frame(value=twominrunyards, id = "2 Min Close Games Run Plays")
+fourminrunyards = pbp_4min_closegameRun$yards_gained
+df_4minRun = data.frame(value=fourminrunyards, id = "4 Min Close Games Run Plays")
+firstqtrrunyards = pbp_1stQRun$yards_gained
+df_1stQRun = data.frame(value= firstqtrrunyards, id = "1st Quarter Run Plays")
+secondqtrrunyards = pbp_2ndQRun$yards_gained
+df_2ndQRun = data.frame(value= secondqtrrunyards, id = "2nd Quarter Run Plays")
+thirdqtrrunyards = pbp_3rdQRun$yards_gained
+df_3rdQRun = data.frame(value= thirdqtrrunyards, id = "3rd Quarter Run Plays")
+df = rbind(df_2minRun, df_4minRun, df_1stQRun, df_2ndQRun, df_3rdQRun)
+ggplot(df, aes(id,value, fill=id)) + geom_boxplot()
+
+runpercentage = 100*nrow(pbp_runs) / (nrow(pbp_runs) + (nrow(pbp_pass)))
+print("In 2001, the probability a run was called was:")
+print(runpercentage)
+
+firstqrunpercentage = 100*nrow(pbp_1stQRun) / (nrow(pbp_1stQ))
+print("In the first quarter, the probability a run was called was:")
+print(firstqrunpercentage)
+
+secondqrunpercentage = 100*nrow(pbp_2ndQRun) / (nrow(pbp_2ndQ))
+print("In the second quarter, the probability a run was called was:")
+print(secondqrunpercentage)
+
+thirdqrunpercentage = 100*nrow(pbp_3rdQRun) / (nrow(pbp_3rdQ))
+print("In the third quarter, the probability a run was called was:")
+print(thirdqrunpercentage)
+
+twominrunpercentage = 100*nrow(pbp_2min_closegameRun) / (nrow(pbp_2min_closegame))
+print("In 2-min close games, the probability a run was called was:")
+print(twominrunpercentage)
+
+fourminrunpercentage = 100*nrow(pbp_4min_closegameRun) / (nrow(pbp_4min_closegame))
+print("In 4-min close games, the probability a run was called was:")
+print(fourminrunpercentage)
+
+
+
+```
+
+```{r}
+#Split the field into 5 quadrants and assess the yardage gained in every scenario
+pbp_own20 <- pbp_offense  %>%
+  filter(yardline_100 >= 81 & yardline_100 <= 100)
+pbp_own40 <- pbp_offense  %>%
+  filter(yardline_100 >= 61 & yardline_100 <= 80)
+pbp_opp40 <- pbp_offense  %>%
+  filter(yardline_100 >= 41 & yardline_100 <= 60)
+pbp_opp20 <- pbp_offense  %>%
+  filter(yardline_100 >= 21 & yardline_100 <= 40)
+pbp_redzone <- pbp_offense  %>%
+  filter(yardline_100 >= 0 & yardline_100 <= 20)
+quadrant1yards = pbp_own20$yards_gained
+df_quadrant1yards = data.frame(value=quadrant1yards, id = "Plays between Own 0 - 20")
+hist(quadrant1yards, xlab="Yards Gained on Plays Starting from Own 0 - 20", 
+     main = "Histogram of Yardage Gained on Plays Starting from Own 0 -20", breaks = 100, xlim = c(0,100),ylim = c(0,1500))
+quadrant2yards = pbp_own40$yards_gained
+df_quadrant2yards = data.frame(value=quadrant2yards, id = "Plays between Own 21 - 40")
+hist(quadrant2yards, xlab="Yards Gained on Plays Starting from Own 21 - 40", 
+     main = "Histogram of Yardage Gained on Plays Starting from Own 21 -40", breaks = 100, freq = FALSE, xlim = c(0,100))
+quadrant3yards = pbp_opp40$yards_gained
+df_quadrant3yards = data.frame(value=quadrant3yards, id = "Plays between Own 41 - Opponent 40")
+hist(quadrant3yards, xlab="Yards Gained on Plays Starting from Own 41 - Opponent 40", 
+     main = "Histogram of Yardage Gained on Plays Starting from Own 41 - Opponent 40", breaks = 100, freq = FALSE, xlim = c(0,100))
+quadrant4yards = pbp_opp20$yards_gained
+df_quadrant4yards = data.frame(value=quadrant4yards, id = "Plays between Opponent 41 - 20")
+hist(quadrant4yards, xlab="Yards Gained on Plays Starting from Opponent 41 - 20", 
+     main = "Histogram of Yardage Gained on Plays Starting from Opponent 41 -20", breaks = 100, freq = FALSE, xlim = c(0,100))
+quadrant5yards = pbp_redzone$yards_gained
+df_quadrant5yards = data.frame(value=quadrant5yards, id = "Plays between Opponent 20 - 0 (Redzone)")
+hist(quadrant5yards, xlab="Yards Gained on Plays Starting in the Redzone", 
+     main = "Histogram of Yardage Gained on Plays Starting in the Redzone", breaks = 100, freq = FALSE, xlim = c(0,100))
+
+df = rbind(df_quadrant1yards, df_quadrant2yards, df_quadrant3yards, df_quadrant4yards, df_quadrant5yards)
+ggplot(df, aes(id,value, fill=id)) + geom_boxplot()
+
+```
+
+
+```{r}
+#Segmentation of the field, but assessing only runs here
+pbp_own20Runs <- pbp_own20  %>%
+  filter(play_type == "run")
+pbp_own40Runs <- pbp_own40  %>%
+  filter(play_type == "run")
+pbp_opp40Runs <- pbp_opp40  %>%
+  filter(play_type == "run")
+pbp_opp20Runs <- pbp_opp20  %>%
+  filter(play_type == "run")
+pbp_redzoneRuns <- pbp_redzone  %>%
+  filter(play_type == "run")
+
+quadrant1yardsRuns = pbp_own20Runs$yards_gained
+df_quadrant1yardsRuns = data.frame(value=quadrant1yardsRuns, id = "Runs between Own 0 - 20")
+hist(quadrant1yardsRuns, xlab="Yards Gained on Runs Starting from Own 0 - 20", 
+     main = "Histogram of Yardage Gained on Runs Starting from Own 0 -20", breaks = 100, freq = FALSE, xlim = c(0,100))
+quadrant2yardsRuns = pbp_own40Runs$yards_gained
+df_quadrant2yardsRuns = data.frame(value=quadrant2yardsRuns, id = "Runs between Own 21 - 40")
+hist(quadrant2yardsRuns, xlab="Yards Gained on Runs Starting from Own 21 - 40", 
+     main = "Histogram of Yardage Gained on Runs Starting from Own 21 -40", breaks = 100, freq = FALSE, xlim = c(0,100))
+quadrant3yardsRuns = pbp_opp40Runs$yards_gained
+df_quadrant3yardsRuns = data.frame(value=quadrant3yardsRuns, id = "Runs between Own 41 - Opponent 40")
+hist(quadrant3yards, xlab="Yards Gained on Runs Starting from Own 41 - Opponent 40", 
+     main = "Histogram of Yardage Gained on Runs Starting from Own 41 - Opponent 40", breaks = 100,freq = FALSE, xlim = c(0,100))
+quadrant4yardsRuns = pbp_opp20Runs$yards_gained
+df_quadrant4yardsRuns = data.frame(value=quadrant4yardsRuns, id = "Runs between Opponent 41 - 20")
+hist(quadrant4yards, xlab="Yards Gained on Runs Starting from Opponent 41 - 20", 
+     main = "Histogram of Yardage Gained on Runs Starting from Opponent 41 -20", breaks = 100, freq = FALSE, xlim = c(0,100))
+quadrant5yardsRuns = pbp_redzoneRuns$yards_gained
+df_quadrant5yardsRuns = data.frame(value=quadrant5yardsRuns, id = "Runs between Opponent 20 - 0 (Redzone)")
+hist(quadrant5yards, xlab="Yards Gained on Runs Starting in the Redzone", 
+     main = "Histogram of Yardage Gained on Runs Starting in the Redzone", breaks = 100, freq = FALSE, xlim = c(0,100))
+
+df = rbind(df_quadrant1yardsRuns, df_quadrant2yardsRuns, df_quadrant3yardsRuns, df_quadrant4yardsRuns, df_quadrant5yardsRuns)
+ggplot(df, aes(id,value, fill=id)) + geom_boxplot()
+
+runpercentage = 100*nrow(pbp_runs) / (nrow(pbp_runs) + (nrow(pbp_pass)))
+print("In 2001, the probability a run was called was:")
+print(runpercentage)
+
+firstquadrunpercentage = 100*nrow(pbp_own20Runs) / (nrow(pbp_own20))
+secondquadrunpercentage = 100*nrow(pbp_own40Runs) / (nrow(pbp_own40))
+thirdquadrunpercentage = 100*nrow(pbp_opp40Runs) / (nrow(pbp_opp40))
+fourthquadrunpercentage = 100*nrow(pbp_opp20Runs) / (nrow(pbp_opp20))
+fifthquadrunpercentage = 100*nrow(pbp_redzoneRuns) / (nrow(pbp_redzone))
+
+print("By quadrant, the run percentages were:")
+print(firstquadrunpercentage)
+print(secondquadrunpercentage)
+print(thirdquadrunpercentage)
+print(fourthquadrunpercentage)
+print(fifthquadrunpercentage)
+
+```
+
+```{r}
+#Segmentation of the field, but assessing only runs here
+pbp_own20Pass <- pbp_own20  %>%
+  filter(play_type == "pass")
+pbp_own40Pass <- pbp_own40  %>%
+  filter(play_type == "pass")
+pbp_opp40Pass <- pbp_opp40  %>%
+  filter(play_type == "pass")
+pbp_opp20Pass <- pbp_opp20  %>%
+  filter(play_type == "pass")
+pbp_redzonePass <- pbp_redzone  %>%
+  filter(play_type == "pass")
+
+quadrant1yardsPass = pbp_own20Pass$yards_gained
+df_quadrant1yardsPass = data.frame(value=quadrant1yardsPass, id = "Pass between Own 0 - 20")
+hist(quadrant1yardsPass, xlab="Yards Gained on Pass Starting from Own 0 - 20", 
+     main = "Histogram of Yardage Gained on Pass Starting from Own 0 -20", breaks = 100, freq = FALSE, xlim = c(0,100))
+quadrant2yardsPass = pbp_own40Pass$yards_gained
+df_quadrant2yardsPass = data.frame(value=quadrant2yardsPass, id = "Pass between Own 21 - 40")
+hist(quadrant2yardsPass, xlab="Yards Gained on Pass Starting from Own 21 - 40", 
+     main = "Histogram of Yardage Gained on Pass Starting from Own 21 -40", breaks = 100, freq = FALSE, xlim = c(0,100))
+quadrant3yardsPass = pbp_opp40Pass$yards_gained
+df_quadrant3yardsPass = data.frame(value=quadrant3yardsPass, id = "Pass between Own 41 - Opponent 40")
+hist(quadrant3yards, xlab="Yards Gained on Pass Starting from Own 41 - Opponent 40", 
+     main = "Histogram of Yardage Gained on Pass Starting from Own 41 - Opponent 40", breaks = 100, freq = FALSE, xlim = c(0,100))
+quadrant4yardsPass = pbp_opp20Pass$yards_gained
+df_quadrant4yardsPass = data.frame(value=quadrant4yardsPass, id = "Pass between Opponent 41 - 20")
+hist(quadrant4yards, xlab="Yards Gained on Pass Starting from Opponent 41 - 20", 
+     main = "Histogram of Yardage Gained on Pass Starting from Opponent 41 -20", breaks = 100, freq = FALSE, xlim = c(0,100))
+quadrant5yardsPass = pbp_redzonePass$yards_gained
+df_quadrant5yardsPass = data.frame(value=quadrant5yardsPass, id = "Pass between Opponent 20 - 0 (Redzone)")
+hist(quadrant5yards, xlab="Yards Gained on Pass Starting in the Redzone", 
+     main = "Histogram of Yardage Gained on Pass Starting in the Redzone", breaks = 100, freq = FALSE, xlim = c(0,100))
+
+df = rbind(df_quadrant1yardsPass, df_quadrant2yardsPass, df_quadrant3yardsPass, df_quadrant4yardsPass, df_quadrant5yardsPass)
+ggplot(df, aes(id,value, fill=id)) + geom_boxplot()
+
+Passpercentage = 100*nrow(pbp_pass) / (nrow(pbp_runs) + (nrow(pbp_pass)))
+print("In 2001, the probability a Pass was called was:")
+print(Passpercentage)
+
+firstquadPasspercentage = 100*nrow(pbp_own20Pass) / (nrow(pbp_own20))
+secondquadrunpercentage = 100*nrow(pbp_own40Pass) / (nrow(pbp_own40))
+thirdquadrunpercentage = 100*nrow(pbp_opp40Pass) / (nrow(pbp_opp40))
+fourthquadrunpercentage = 100*nrow(pbp_opp20Pass) / (nrow(pbp_opp20))
+fifthquadrunpercentage = 100*nrow(pbp_redzonePass) / (nrow(pbp_redzone))
+
+print("By quadrant, the pass percentages were:")
+print(firstquadrunpercentage)
+print(secondquadrunpercentage)
+print(thirdquadrunpercentage)
+print(fourthquadrunpercentage)
+print(fifthquadrunpercentage)
+
+```
+
+
